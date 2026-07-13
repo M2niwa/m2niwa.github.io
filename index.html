@@ -348,6 +348,13 @@ body::before {
 }
 .game-chip:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-1px); }
 
+/* casual game variant */
+.game-chip.casual {
+  background: rgba(129,140,248,0.06); border-color: rgba(129,140,248,0.1);
+  font-size: 12px; padding: 6px 12px;
+}
+.game-chip.casual:hover { border-color: var(--indigo); color: var(--indigo); }
+
 /* ===== TERMINAL LOG ===== */
 .terminal {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
@@ -811,12 +818,19 @@ html.en .tag { font-size: 11px; }
       <div class="lifestyle-col">
         <h3 class="lifestyle-subtitle" data-en="🎮 Gaming & Esports">🎮 游戏与竞技</h3>
         <p class="lifestyle-text" data-en="Six years in game design, 1000+ hours in strategy games. OW amateur competition experience, team coach. Skilled in number crunching and competitive analysis.">六年游戏策划视角，超千小时策略游戏积累。守望先锋业余赛事经历，兼任校队教练。擅长数值框架拆解、竞品分析。</p>
+        <p class="lifestyle-text" data-en="Deep into casual games too — pursuing aesthetic harmony and satisfying gameplay loops." style="margin-top:-8px;">休闲游戏亦有深度浸淫，同时追求审美对应与体验循环。</p>
         <div class="chips-grid">
-          <div class="game-chip"data-en="Overwatch">守望先锋</div><div class="game-chip"data-en="DOTA2">DOTA2</div>
-          <div class="game-chip"data-en="CS">CS</div><div class="game-chip"data-en="APEX">APEX</div>
-          <div class="game-chip"data-en="StarCraft II">星际争霸2</div><div class="game-chip"data-en="Civilization">文明</div>
-          <div class="game-chip"data-en="Stellaris">群星</div><div class="game-chip"data-en="Escape from Tarkov">逃离塔科夫</div>
-          <div class="game-chip"data-en="Starsector">远行星号</div>
+          <div class="game-chip" data-en="Overwatch">守望先锋</div><div class="game-chip" data-en="DOTA2">DOTA2</div>
+          <div class="game-chip" data-en="CS">CS</div><div class="game-chip" data-en="APEX">APEX</div>
+          <div class="game-chip" data-en="StarCraft II">星际争霸2</div><div class="game-chip" data-en="Civilization">文明</div>
+          <div class="game-chip" data-en="Stellaris">群星</div><div class="game-chip" data-en="Escape from Tarkov">逃离塔科夫</div>
+          <div class="game-chip" data-en="Starsector">远行星号</div>
+        </div>
+        <div class="chips-grid" style="margin-top:10px;">
+          <div class="game-chip casual" data-en="Stardew Valley">星露谷物语</div><div class="game-chip casual" data-en="Timberborn">海狸浮生记</div>
+          <div class="game-chip casual" data-en="BattleBlock Theater">战斗方块剧场</div><div class="game-chip casual" data-en="Starbound">星界边境</div>
+          <div class="game-chip casual" data-en="NIKKI UP TO U">暖暖</div><div class="game-chip casual" data-en="Onmyoji">阴阳师</div>
+          <div class="game-chip casual" data-en="Factorio">异星工场</div><div class="game-chip casual" data-en="Surviving Mars">火星求生</div>
         </div>
       </div>
     </div>
