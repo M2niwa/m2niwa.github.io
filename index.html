@@ -963,7 +963,6 @@ function shuffleWines() {
 }
 
 function getWines() { return document.documentElement.lang === 'en' ? winesEn : wines; }
-let shuffledWines = [];
 function renderWines(items) {
   const container = document.getElementById('wineCompact');
   if (!container) return;
