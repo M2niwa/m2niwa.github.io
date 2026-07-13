@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>跨领域迁移学习：从CSOD到USOD的梯度解耦实践 — M1NIWA</title>
+<meta name="description" content="将CSOD伪装目标检测的梯度解耦方法迁移到USOD水下显著性检测，DGNet架构改造与GGEM模块设计。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg-elevated: #1a1d25;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --text: #e4e6eb;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+  --blue: #3b82f6;
+  --blue-hover: #60a5fa;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(59,130,246,0.3);color:#fff}
+.blog-nav{position:sticky;top:0;z-index:100;background:rgba(15,17,23,0.85);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--border)}
+.blog-nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1100px;margin:0 auto;padding:0 24px}
+.blog-nav-back{font-size:16px;font-weight:600;color:var(--blue);text-decoration:none;transition:color 0.2s}
+.blog-nav-back:hover{color:var(--blue-hover)}
+.blog-nav-title{font-size:14px;color:var(--text-secondary)}
+.blog-container{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+.article-header{margin-bottom:48px;padding-top:24px}
+.article-title{font-size:36px;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:12px;color:var(--text)}
+.article-date{font-size:14px;color:var(--text-tertiary)}
+.article-body{font-size:17px;line-height:1.8}
+.article-body p{margin-bottom:20px}
+.article-body h2{font-size:24px;font-weight:700;margin:48px 0 16px;padding-left:16px;border-left:3px solid var(--blue);color:var(--text)}
+.article-body ul,.article-body ol{margin-bottom:20px;padding-left:24px}
+.article-body li{margin-bottom:8px}
+.article-body strong{color:#fff;font-weight:600}
+.article-body a{color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(59,130,246,0.3);transition:border-color 0.2s}
+.article-body a:hover{border-color:var(--blue)}
+.article-body code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;background:rgba(59,130,246,0.1);color:var(--blue-hover);padding:2px 6px;border-radius:4px}
+.article-body pre{font-family:'JetBrains Mono',ui-monospace,monospace;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;overflow-x:auto;font-size:13px;line-height:1.7;color:var(--text)}
+.article-body pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.article-body blockquote{border-left:3px solid var(--blue);padding:8px 20px;margin:24px 0;color:var(--text-secondary);font-style:italic}
+.article-body hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+.blog-footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}
+.blog-footer p{font-size:13px;color:var(--text-tertiary)}
+.blog-footer a{color:var(--text-secondary);text-decoration:none;transition:color 0.2s}
+.blog-footer a:hover{color:var(--blue)}
+</style>
+</head>
+<body>
+
+<nav class="blog-nav">
+  <div class="blog-nav-inner">
+    <a href="/index.html" class="blog-nav-back">← M1NIWA</a>
+    <span class="blog-nav-title">梯度解耦</span>
+  </div>
+</nav>
+
+<div class="blog-container">
+  <header class="article-header">
+    <h1 class="article-title">跨领域迁移学习：从CSOD到USOD的梯度解耦实践</h1>
+    <p class="article-date">2026-02-28</p>
+  </header>
+
+  <article class="article-body">
+    <p>伪装目标检测（CSOD）和水下显著性检测（USOD）看起来是完全不同的任务——一个在陆地上找隐藏的动物，一个在水下找显著的物体。但深入分析后你会发现，两者在<strong>视觉挑战的底层结构上高度同构</strong>。</p>
+
+    <h2>CSOD 与 USOD 的结构同构性</h2>
+    <p>CSOD 的核心难点是：目标通过伪装融入背景，边界模糊，纹理特征不可靠。而 USOD 面临的是：水下光线衰减导致颜色退化，悬浮颗粒造成纹理丢失，水体的蓝绿色偏破坏颜色恒常性。</p>
+    <p>两者的本质区别只在于退化来源不同（生物伪装 vs 物理光学），但<strong>底层特征退化模式惊人地相似</strong>——都是"边界模糊 + 纹理丢失 + 颜色退化"的三重困境。这意味着 CSOD 的解决方案有可能迁移到 USOD 上，而不需要从零设计全新的网络。</p>
+
+    <h2>DGNet 的梯度解耦思路</h2>
+    <p>DGNet（Decomposition-Guidance Network）的核心洞察是：显著性检测网络的梯度信号中，<strong>上下文梯度和纹理梯度往往是耦合的</strong>，导致模型在模糊边界区域产生振荡。DGNet 通过一个分解模块将两者分开：上下文分支负责大范围语义理解（"这是鱼还是石头"），纹理分支负责局部边界精修（"鱼的边缘在哪里"）。</p>
+    <p>我们将这个思路引入 USOD，设计了<strong>梯度特征调制模块（GFM）</strong>：在反向传播阶段，GFM 根据当前像素的上下文置信度动态缩放纹理分支的梯度权重——背景区域上下文置信度高时，纹理梯度几乎不传播；边界区域则反向放大纹理梯度。</p>
+
+    <h2>Charbonnier Loss 的陷阱</h2>
+    <p>最初的实验使用了 Charbonnier Loss（一种平滑的 L1 变体），但发现它<strong>用一个全局平滑参数淹没了所有像素的梯度差异</strong>。在水下场景中，前景（鱼、珊瑚）和背景（沙地、海水）的梯度分布悬殊，Charbonnier 的固定 epsilon 把前景的微弱梯度信号也平滑掉了。</p>
+    <p>我们的替代方案是<strong>梯度特征驱动损失</strong>：在损失函数层面直接操作梯度图，让网络关注"梯度变化剧烈"的边界像素，而不是全局平滑。实验表明，仅这项替换就带来了 2.3% 的 F-measure 提升。</p>
+
+    <h2>GGEM 模块设计思路</h2>
+    <p>GFM 解决了训练时的梯度分配，但推理时的特征融合同样关键。我们设计了<strong>全局-局部特征增强模块（GGEM）</strong>：在编码器-解码器跳跃连接中，GGEM 先通过全局池化捕获水下场景的整体光照分布，再将其注入到局部特征图中做逐通道的仿射变换。这实际上是在特征空间里做了一次"白平衡校正"。</p>
+
+    <h2>训练配置</h2>
+    <p>所有实验在单张 RTX 3070（8GB）上完成。输入分辨率 256×256，batch size=8，优化器使用 AdamW（lr=1e-4，weight_decay=1e-4）配合 cosine annealing 调度。启用 mixed precision 训练，200 个 epoch 约需 5.5 小时。</p>
+
+    <hr>
+    <p>从 CSOD 到 USOD 的迁移不是简单的网络复制，而是对梯度信号传播机制的重新思考。GFM 和 GGEM 这两个模块的设计哲学可以概括为一句话：<strong>让网络学会"在哪里看得仔细，在哪里粗略扫过"</strong>——这正是梯度解耦的核心价值。</p>
+  </article>
+</div>
+
+<footer class="blog-footer">
+  <p>© 2026 M1NIWA · <a href="/index.html">返回首页</a> · 本文约 820 字</p>
+</footer>
+
+</body>
+</html>

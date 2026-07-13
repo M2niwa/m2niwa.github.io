@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M1NIWA — Developer & Designer</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   M1NIWA v2 — Clean Dark Portfolio
+   Inspired by modern dev blogs, dogfight360 simplicity
+   ============================================================ */
+
+:root {
+  --bg: #0f1117;
+  --bg-elevated: #1a1d25;
+  --bg-card: #1e2130;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --text: #e4e6eb;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+  --blue: #3b82f6;
+  --blue-hover: #60a5fa;
+  --blue-bg: rgba(59,130,246,0.1);
+  --indigo: #818cf8;
+  --indigo-bg: rgba(129,140,248,0.1);
+  --green: #34d399;
+  --green-bg: rgba(52,211,153,0.1);
+  --amber: #fbbf24;
+  --amber-bg: rgba(251,191,36,0.1);
+  --red: #f87171;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 100px;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle grain texture overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  opacity: 0.7;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+::selection { background: rgba(59,130,246,0.3); color: #fff; }
+
+/* ===== CONTAINER ===== */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ===== HEADER ===== */
+.header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(15,17,23,0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.3s;
+}
+
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px; max-width: 1100px; margin: 0 auto; padding: 0 24px;
+}
+
+.header-logo {
+  font-size: 20px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.02em; text-decoration: none;
+  transition: color 0.2s;
+}
+.header-logo:hover { color: var(--blue); }
+.header-logo span { color: var(--blue); }
+
+.header-nav {
+  display: flex; gap: 4px; align-items: center;
+}
+
+.header-nav a {
+  padding: 6px 16px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 500; color: var(--text-secondary);
+  text-decoration: none; transition: all 0.2s;
+}
+.header-nav a:hover,
+.header-nav a.active {
+  color: var(--text); background: var(--bg-elevated);
+}
+.header-nav a:active { transform: scale(0.97); }
+
+.header-social {
+  display: flex; gap: 12px; align-items: center;
+}
+.header-social a {
+  color: var(--text-tertiary); font-size: 18px;
+  transition: color 0.2s; text-decoration: none;
+}
+.header-social a:hover { color: var(--blue); }
+
+/* Mobile nav toggle */
+.menu-toggle {
+  display: none; background: none; border: none;
+  color: var(--text); font-size: 24px; cursor: pointer; padding: 4px;
+}
+
+/* ===== SECTIONS ===== */
+.section {
+  padding: 80px 0;
+}
+.section + .section { border-top: 1px solid var(--border); }
+
+.section-header {
+  margin-bottom: 48px;
+}
+.section-label {
+  font-size: 12px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--blue); margin-bottom: 8px;
+}
+.section-title {
+  font-size: 36px; font-weight: 700; letter-spacing: -0.03em;
+  color: var(--text); line-height: 1.15; margin-bottom: 12px;
+}
+.section-desc {
+  font-size: 17px; color: var(--text-secondary); max-width: 560px;
+}
+
+/* ===== HERO ===== */
+.hero {
+  display: flex; align-items: center; gap: 64px;
+  padding: 60px 0 80px;
+}
+.hero-avatar {
+  width: 120px; height: 120px; border-radius: 50%; flex-shrink: 0;
+  background: var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 48px; font-weight: 700; color: #fff;
+  box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px rgba(59,130,246,0.2);
+}
+.hero-content { flex: 1; }
+.hero-name {
+  font-size: 48px; font-weight: 700; letter-spacing: -0.04em;
+  line-height: 1.05; margin-bottom: 12px;
+  color: var(--text);
+}
+.hero-bio {
+  font-size: 18px; color: var(--text-secondary); margin-bottom: 20px;
+  line-height: 1.6;
+}
+.hero-tags {
+  display: flex; flex-wrap: wrap; gap: 8px;
+}
+
+/* ===== TAG PILLS ===== */
+.tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 12px; border-radius: 9999px;
+  font-size: 12px; font-weight: 500; letter-spacing: 0.01em;
+  transition: transform 0.15s, box-shadow 0.15s;
+  cursor: default;
+  background: var(--blue-bg); color: var(--blue);
+}
+.tag:hover { transform: translateY(-1px); }
+.tag-neutral { background: rgba(255,255,255,0.06); color: var(--text-secondary); }
+
+/* ===== SKILL BARS ===== */
+.skills-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+}
+.skill-group {}
+.skill-group-title {
+  font-size: 13px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 20px;
+  color: var(--blue);
+}
+
+.skill-item {
+  display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
+}
+.skill-name {
+  width: 130px; font-size: 14px; font-weight: 500;
+  color: var(--text-secondary); text-align: right; flex-shrink: 0;
+}
+.skill-track {
+  flex: 1; height: 6px; background: rgba(255,255,255,0.05);
+  border-radius: 3px; overflow: hidden;
+}
+.skill-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--blue), #60a5fa);
+  transition: width 0.8s var(--ease);
+}
+
+/* ===== PROJECT CARDS ===== */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+.project-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+  transition: all 0.25s var(--ease);
+  position: relative; overflow: hidden;
+}
+.project-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+.project-card:active { transform: translateY(0) scale(0.985); }
+.project-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--blue), var(--indigo));
+  opacity: 0; transition: opacity 0.3s;
+}
+.project-card:hover::before { opacity: 1; }
+.project-card h3 {
+  font-size: 18px; font-weight: 600; letter-spacing: -0.01em;
+  margin-bottom: 8px; color: var(--text);
+}
+.project-card p {
+  font-size: 14px; color: var(--text-secondary);
+  line-height: 1.55; margin-bottom: 14px;
+}
+.project-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.project-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 13px; font-weight: 500; color: var(--blue);
+  text-decoration: none; transition: gap 0.2s;
+}
+.project-link:hover { gap: 8px; }
+
+/* ===== WINE CARDS ===== */
+.wine-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+.wine-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px 20px;
+  text-align: center; cursor: pointer;
+  transition: all 0.3s var(--ease);
+  position: relative;
+}
+.wine-card:hover {
+  border-color: var(--blue);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(59,130,246,0.08);
+}
+.wine-card .wine-emoji { font-size: 48px; margin-bottom: 12px; }
+.wine-card .wine-name {
+  font-size: 20px; font-weight: 600; color: var(--text);
+  margin-bottom: 4px;
+}
+.wine-card .wine-name-en {
+  font-size: 12px; color: var(--text-tertiary); margin-bottom: 12px;
+}
+.wine-card .wine-notes {
+  font-size: 13px; color: var(--text-secondary); line-height: 1.5;
+}
+.wine-card .wine-meta {
+  font-size: 11px; color: var(--text-tertiary); margin-top: 10px;
+}
+
+/* ===== TIMELINE (Esports) ===== */
+.timeline {
+  position: relative; padding-left: 28px; max-width: 700px;
+}
+.timeline::before {
+  content: ''; position: absolute; left: 7px; top: 4px; bottom: 4px;
+  width: 2px; background: linear-gradient(to bottom, var(--blue), transparent);
+}
+.timeline-item { position: relative; margin-bottom: 36px; }
+.timeline-item::before {
+  content: ''; position: absolute; left: -25px; top: 4px;
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 12px rgba(59,130,246,0.3);
+}
+.timeline-year {
+  font-size: 12px; font-weight: 600; color: var(--blue);
+  letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px;
+}
+.timeline-title {
+  font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 6px;
+}
+.timeline-desc { font-size: 14px; color: var(--text-secondary); }
+
+/* ===== GAME CHIPS ===== */
+.chips-grid {
+  display: flex; flex-wrap: wrap; gap: 8px; max-width: 700px; margin-top: 32px;
+}
+.game-chip {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 16px;
+  font-size: 13px; font-weight: 500; color: var(--text-secondary);
+  transition: all 0.2s;
+}
+.game-chip:hover { border-color: var(--blue); color: var(--blue); transform: translateY(-1px); }
+
+/* ===== TERMINAL LOG ===== */
+.terminal {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 28px; max-width: 700px;
+  position: relative;
+}
+.terminal::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(52,211,153,0.2), transparent);
+}
+.terminal .line { margin-bottom: 8px; font-size: 13px; line-height: 1.7; }
+.terminal .prompt { color: var(--green); }
+.terminal .cmd    { color: var(--text); }
+.terminal .out    { color: var(--text-secondary); }
+.terminal .cursor {
+  color: var(--amber);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ===== LIFESTYLE MERGED ===== */
+.lifestyle-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+.lifestyle-col {}
+.lifestyle-subtitle {
+  font-size: 15px; font-weight: 600; color: var(--text);
+  margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: -0.01em;
+}
+.lifestyle-text {
+  font-size: 14px; color: var(--text-secondary);
+  line-height: 1.6; margin-bottom: 18px;
+}
+.wine-compact {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.wine-mini {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  transition: all 0.2s; cursor: default;
+}
+.wine-mini:hover { border-color: var(--blue); transform: translateY(-1px); }
+.wine-mini .wm-emoji { font-size: 24px; margin-bottom: 4px; }
+.wine-mini .wm-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.wine-mini .wm-notes { font-size: 11px; color: var(--text-tertiary); line-height: 1.45; }
+
+.wine-shuffle-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 16px; padding: 8px 18px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;
+  color: var(--text-secondary); cursor: pointer;
+  transition: all 0.2s; font-family: inherit;
+}
+.wine-shuffle-btn:hover { border-color: var(--blue); color: var(--blue); }
+.wine-shuffle-btn:active { transform: scale(0.97); }
+.wine-shuffle-btn .shuffle-icon { font-size: 16px; display: inline-block; }
+.wine-shuffle-btn.shuffling .shuffle-icon { animation: spin 0.5s var(--ease); }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ===== ENHANCED TECH BLOG CARDS ===== */
+.technote-item {
+  display: block; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px 28px; text-decoration: none;
+  color: inherit; transition: all 0.25s var(--ease);
+  position: relative; overflow: hidden;
+}
+.technote-item::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+  background: var(--blue); opacity: 0; transition: opacity 0.3s;
+}
+.technote-item:hover {
+  border-color: var(--border-hover);
+  transform: translateX(6px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+.technote-item:hover::before { opacity: 1; }
+.technote-title {
+  font-size: 18px; font-weight: 600; color: var(--text);
+  letter-spacing: -0.01em; margin-bottom: 8px;
+  transition: color 0.2s;
+}
+.technote-item:hover .technote-title { color: var(--blue); }
+.technote-summary {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.6;
+  margin-bottom: 14px;
+}
+.technote-meta {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.technote-date { font-size: 11px; color: var(--text-tertiary); }
+.technote-arrow {
+  margin-left: auto; font-size: 16px; color: var(--text-tertiary);
+  transition: transform 0.2s, color 0.2s;
+}
+.technote-item:hover .technote-arrow {
+  color: var(--blue); transform: translateX(4px);
+}
+
+/* ===== FEATURED BLOG GRID ===== */
+.blog-featured {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.blog-featured .technote-item { padding: 22px 24px; }
+.blog-featured .technote-title { font-size: 17px; }
+.blog-more-wrap { margin-top: 28px; text-align: center; }
+.blog-more-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 24px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); font-size: 14px; font-weight: 500;
+  color: var(--blue); text-decoration: none;
+  transition: all 0.2s; font-family: inherit;
+}
+.blog-more-btn:hover { border-color: var(--blue); background: var(--blue-bg); }
+.blog-more-btn:active { transform: scale(0.97); }
+
+/* ===== CONTACT ===== */
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+.contact-card {
+  display: block; background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; text-align: center;
+  text-decoration: none; color: inherit;
+  transition: all 0.25s var(--ease);
+}
+.contact-card:hover {
+  border-color: var(--blue);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(59,130,246,0.08);
+}
+.contact-icon { font-size: 32px; margin-bottom: 12px; }
+.contact-label { font-size: 15px; font-weight: 600; color: var(--text); }
+.contact-value { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
+
+/* ===== FOOTER ===== */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 0; text-align: center;
+}
+.footer p {
+  font-size: 13px; color: var(--text-tertiary);
+}
+.footer .powered {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 8px;
+}
+.footer .powered .tag { font-size: 10px; padding: 3px 9px; }
+
+/* ===== SCROLL-TO-TOP ===== */
+.scroll-top {
+  position: fixed; bottom: 32px; right: 32px;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  color: var(--text-secondary); font-size: 20px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  z-index: 50; opacity: 0; visibility: hidden;
+  transition: all 0.3s var(--ease);
+}
+.scroll-top.visible { opacity: 1; visibility: visible; }
+.scroll-top:hover {
+  border-color: var(--blue); color: var(--blue);
+  transform: translateY(-2px);
+}
+
+/* ===== RESPONSIVE / MOBILE ===== */
+@media (max-width: 768px) {
+  .header-nav { display: none; }
+  .menu-toggle { display: block; }
+  .header-nav.open {
+    display: flex; flex-direction: column; position: absolute;
+    top: 64px; left: 0; right: 0;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border);
+    padding: 12px;
+  }
+  .header-nav a { font-size: 16px; padding: 12px 16px; }
+  .hero { flex-direction: column; text-align: center; gap: 28px; padding: 32px 0 60px; }
+  .hero-name { font-size: 36px; }
+  .hero-tags { justify-content: center; }
+  .container { padding: 0 20px; }
+  .section { padding: 48px 0; }
+  .section-title { font-size: 26px; }
+  .section-header { margin-bottom: 32px; }
+
+  .skills-grid { grid-template-columns: 1fr; gap: 24px; }
+  .skill-name { width: 90px; font-size: 13px; }
+
+  .lifestyle-grid { grid-template-columns: 1fr; gap: 28px; }
+  .wine-compact { grid-template-columns: 1fr 1fr; }
+
+  .projects-grid { grid-template-columns: 1fr; }
+
+  .technotes-list { max-width: 100%; }
+  .technote-item { padding: 20px; }
+  .technote-title { font-size: 16px; }
+
+  .contact-grid { grid-template-columns: 1fr 1fr; }
+
+  .scroll-top { width: 40px; height: 40px; bottom: 20px; right: 20px; }
+}
+
+@media (max-width: 480px) {
+  .hero-name { font-size: 28px; }
+  .hero-avatar { width: 90px; height: 90px; font-size: 36px; }
+  .hero-bio { font-size: 15px; }
+  .section-title { font-size: 22px; }
+  .section { padding: 36px 0; }
+
+  .wine-compact { grid-template-columns: 1fr; }
+
+  .contact-grid { grid-template-columns: 1fr; }
+  .tag { font-size: 11px; padding: 4px 10px; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .status-dot { animation: none; }
+  .terminal .cursor { animation: none; }
+}
+/* Interactive :active feedback */
+.btn:active, .wine-card:active, .technote-item:active,
+.contact-card:active, .scroll-top:active, .game-chip:active { transform: scale(0.97); }
+
+/* ===== H5 TRICK #1: Scroll reveal ===== */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+.reveal.visible {
+  opacity: 1; transform: translateY(0);
+}
+
+/* ===== H5 TRICK #3: Smart header hide/show ===== */
+.header {
+  transition: transform 0.3s var(--ease);
+}
+.header.hidden {
+  transform: translateY(-100%);
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header" id="header">
+  <div class="header-inner">
+    <a href="#hero" class="header-logo">M<span>1</span>NIWA</a>
+    <nav class="header-nav" id="headerNav">
+      <a href="#hero" class="active">关于</a>
+      <a href="#skills">技能</a>
+      <a href="#technotes">博客</a>
+      <a href="#projects">项目</a>
+      <a href="#lifestyle">兴趣</a>
+      <a href="#diy">DIY</a>
+      <a href="#contact">联系</a>
+    </nav>
+    <div class="header-social">
+      <a href="https://github.com/m2niwa" target="_blank" rel="noopener" title="GitHub">🐙</a>
+      <button class="menu-toggle" id="menuToggle" aria-label="菜单">☰</button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="section" id="hero">
+  <div class="container">
+    <div class="hero">
+      <div class="hero-avatar">M</div>
+      <div class="hero-content">
+        <h1 class="hero-name">M1NIWA</h1>
+        <p class="hero-bio">霍凌志 · AI 开发 & 游戏策划 · <br>DIY 爱好者 · 嗅觉探索者</p>
+        <div class="hero-tags">
+          <span class="tag">Agent</span>
+          <span class="tag">LLM & LoRA</span>
+          <span class="tag">FastAPI</span>
+          <span class="tag">Workflow</span>
+          <span class="tag">PyTorch</span>
+          <span class="tag">CV</span>
+          <span class="tag">电子竞技</span>
+          <span class="tag">Docker</span>
+          <span class="tag">n8n / Coze</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT / SKILLS ===== -->
+<section class="section" id="skills">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Skills</div>
+      <h2 class="section-title">技术栈与能力</h2>
+      <p class="section-desc">从深度学习到后端开发，从 Agent 构建到硬件 DIY</p>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-group">
+        <div class="skill-group-title">AI & 深度学习</div>
+        <div class="skill-item"><span class="skill-name">CV / CV 模型</span><div class="skill-track"><div class="skill-fill" style="width:70%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">Agent 构建</span><div class="skill-track"><div class="skill-fill" style="width:65%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">LLM / LoRA</span><div class="skill-track"><div class="skill-fill" style="width:60%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">AI 调用工具固化</span><div class="skill-track"><div class="skill-fill" style="width:70%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">n8n / Coze / ComfyUI</span><div class="skill-track"><div class="skill-fill" style="width:50%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">LangChain / Neo4j</span><div class="skill-track"><div class="skill-fill" style="width:40%"></div></div></div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group-title">开发 & 工具</div>
+        <div class="skill-item"><span class="skill-name">Python</span><div class="skill-track"><div class="skill-fill" style="width:80%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">React</span><div class="skill-track"><div class="skill-fill" style="width:50%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">Flask / FastAPI</span><div class="skill-track"><div class="skill-fill" style="width:60%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">Docker</span><div class="skill-track"><div class="skill-fill" style="width:60%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">C / C++ / Java</span><div class="skill-track"><div class="skill-fill" style="width:50%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">ArkTS</span><div class="skill-track"><div class="skill-fill" style="width:40%"></div></div></div>
+        <div class="skill-group-title" style="margin-top:28px">工具 & 协作</div>
+        <div class="skill-item"><span class="skill-name">SVN</span><div class="skill-track"><div class="skill-fill" style="width:100%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">Git / GitHub</span><div class="skill-track"><div class="skill-fill" style="width:80%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">Excel / 数据透视</span><div class="skill-track"><div class="skill-fill" style="width:80%"></div></div></div>
+        <div class="skill-item"><span class="skill-name">SolidWorks / CAD</span><div class="skill-track"><div class="skill-fill" style="width:60%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TECH BLOG ===== -->
+<section class="section" id="technotes">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Writing</div>
+      <h2 class="section-title">技术博客</h2>
+      <p class="section-desc">记录项目中学到的工程经验与技术思考</p>
+    </div>
+    <div class="blog-featured" id="blogFeatured">
+      <!-- JS renders 4 featured posts -->
+    </div>
+    <div class="blog-more-wrap">
+      <a href="/blog/index.html" class="blog-more-btn">查看全部 25 篇文章 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROJECTS ===== -->
+<section class="section" id="projects">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Projects</div>
+      <h2 class="section-title">精选项目</h2>
+      <p class="section-desc">AI · 游戏 · 嵌入式 · 工具开发</p>
+    </div>
+    <div class="projects-grid">
+      <div class="project-card">
+        <h3>🐱 宠物面部识别系统</h3>
+        <p>基于 MobileNet-V3 的轻量化宠物个体特征识别。F1 96%、识别率 82%，边缘设备 20+ fps。获评优秀毕设。</p>
+        <div class="project-tags">
+          <span class="tag">PyTorch</span>
+          <span class="tag">MobileNet</span>
+          <span class="tag">CV</span>
+        </div>
+        <a class="project-link" href="https://github.com/M2niwa/petface-recognition-with-mobilenet" target="_blank" rel="noopener">GitHub →</a>
+      </div>
+      <div class="project-card">
+        <h3>🎮 Fashion Crush</h3>
+        <p>海外发行换装+互动故事游戏，面向 20-65 岁欧美女性。Cocos + JSON 关卡配置，已迭代 5 个版本。</p>
+        <div class="project-tags">
+          <span class="tag">AI辅助美术</span>
+          <span class="tag">Cocos</span>
+          <span class="tag">JSON</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <h3>📱 鸿蒙健康助手</h3>
+        <p>基于 ArkTS 的智能穿戴前端应用。包豪斯工业风，7类主页面+23子页面，已过审。</p>
+        <div class="project-tags">
+          <span class="tag">ArkTS</span>
+          <span class="tag">HarmonyOS</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <h3>🌱 STM32 智能水培槽</h3>
+        <p>铝型材 + STM32 自动化水培系统，PID 闭环水位/光照/营养。iCAN 国家级二等奖。</p>
+        <div class="project-tags">
+          <span class="tag">STM32</span>
+          <span class="tag">PID</span>
+          <span class="tag">CAD</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <h3>📝 综测成绩 Agent</h3>
+        <p>自动化综测成绩处理 Agent，Prompt 工程 + 工具链，一键汇总分析。</p>
+        <div class="project-tags">
+          <span class="tag">Agent</span>
+          <span class="tag">Prompt工程</span>
+        </div>
+      </div>
+      <div class="project-card">
+        <h3>🌐 Script Translator</h3>
+        <p>AI 多语言剧本翻译表格生成器，自动化翻译工作流处理。</p>
+        <div class="project-tags">
+          <span class="tag">LLM</span>
+          <span class="tag">Python</span>
+          <span class="tag">Workflow</span>
+        </div>
+        <a class="project-link" href="https://github.com/M2niwa/script-translator" target="_blank" rel="noopener">GitHub →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== LIFESTYLE (Wine + Esports merged) ===== -->
+<section class="section" id="lifestyle">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Lifestyle</div>
+      <h2 class="section-title">工作之外</h2>
+      <p class="section-desc">威士忌品鉴 · 精酿收藏 · 深度策略玩家</p>
+    </div>
+    <div class="lifestyle-grid">
+      <div class="lifestyle-col">
+        <h3 class="lifestyle-subtitle">🥃 酒柜精选</h3>
+        <div class="wine-compact" id="wineCompact">
+          <!-- JS renders 4 items -->
+        </div>
+        <button class="wine-shuffle-btn" id="wineShuffle" title="换一批">
+          <span class="shuffle-icon">🎲</span> 换一批
+        </button>
+      </div>
+      <div class="lifestyle-col">
+        <h3 class="lifestyle-subtitle">🎮 游戏与竞技</h3>
+        <p class="lifestyle-text">六年游戏策划视角，超千小时策略游戏积累。守望先锋业余赛事经历，兼任校队教练。擅长数值框架拆解、竞品分析。</p>
+        <div class="chips-grid">
+          <div class="game-chip">守望先锋</div><div class="game-chip">DOTA2</div>
+          <div class="game-chip">CS</div><div class="game-chip">APEX</div>
+          <div class="game-chip">星际争霸2</div><div class="game-chip">文明</div>
+          <div class="game-chip">群星</div><div class="game-chip">逃离塔科夫</div>
+          <div class="game-chip">远行星号</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DIY ===== -->
+<section class="section" id="diy">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Workshop</div>
+      <h2 class="section-title">DIY 项目日志</h2>
+      <p class="section-desc">硬件 · 嵌入式 · 自造</p>
+    </div>
+    <div class="terminal">
+      <div class="line"><span class="prompt">root@workshop:~$</span> <span class="cmd">cat projects.log</span></div>
+      <div class="line"><span class="out">[2017] STM32 智能水培槽 v1.0 — 铝型材框架 + PID 环控</span></div>
+      <div class="line"><span class="out">[2018] iCAN 创新创业赛 — 国家级二等奖</span></div>
+      <div class="line"><span class="out">[2018] 大创项目 — 省级三等奖</span></div>
+      <div class="line"><span class="out">[2019] 水培槽 v2.0 — 加入气培模块 & 远程监控</span></div>
+      <div class="line"><span class="out">[2024] 展会物料 DIY — 11台不可用电脑重组为7台可用</span></div>
+      <div class="line" style="margin-top:12px"><span class="prompt">root@workshop:~$</span> <span class="cmd">cat /etc/skills.conf</span></div>
+      <div class="line"><span class="out">PLC 编程 (西门子博途) · SolidWorks 2016 · CAD</span></div>
+      <div class="line"><span class="out">电路设计基础 (模拟电子技术) · 铝型材结构搭建</span></div>
+      <div class="line" style="margin-top:12px"><span class="prompt">root@workshop:~$</span> <span class="cmd">_</span><span class="cursor">█</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section class="section" id="contact">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Connect</div>
+      <h2 class="section-title">联系我</h2>
+      <p class="section-desc">欢迎技术交流、项目合作、或一起喝一杯</p>
+    </div>
+    <div class="contact-grid">
+      <a class="contact-card" href="https://github.com/m2niwa" target="_blank" rel="noopener">
+        <div class="contact-icon">🐙</div>
+        <div class="contact-label">GitHub</div>
+        <div class="contact-value">m2niwa</div>
+      </a>
+      <div class="contact-card">
+        <div class="contact-icon">📧</div>
+        <div class="contact-label">Email</div>
+        <div class="contact-value">联系请通过 GitHub</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">🌍</div>
+        <div class="contact-label">所在地</div>
+        <div class="contact-value">中国 · 深圳 / 武汉</div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon">💼</div>
+        <div class="contact-label">职位方向</div>
+        <div class="contact-value">AI 开发 / 游戏策划</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="container">
+    <p>© 2026 M1NIWA · 霍凌志</p>
+    <div class="powered">
+      <span class="tag">FastAPI</span>
+      <span class="tag">Canvas</span>
+      <span class="tag">WebSocket</span>
+      <span class="tag">Uvicorn</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Scroll to top -->
+<button class="scroll-top" id="scrollTop" title="回到顶部">↑</button>
+
+<script>
+/* ===== SCROLL TO TOP ===== */
+const scrollTopBtn = document.getElementById('scrollTop');
+window.addEventListener('scroll', () => {
+  scrollTopBtn.classList.toggle('visible', window.scrollY > 500);
+});
+scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+/* ===== HEADER NAV ACTIVE STATE ===== */
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.header-nav a');
+
+function updateActiveNav() {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 200) current = s.id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === `#${current}`);
+  });
+}
+window.addEventListener('scroll', updateActiveNav);
+updateActiveNav();
+
+/* ===== MOBILE MENU ===== */
+const menuToggle = document.getElementById('menuToggle');
+const headerNav = document.getElementById('headerNav');
+menuToggle.addEventListener('click', () => headerNav.classList.toggle('open'));
+headerNav.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => headerNav.classList.remove('open'));
+});
+
+/* ===== WINE DATA ===== */
+const wines = [
+  { name:'Kavalan 经典雪莉桶', emoji:'🥃', notes:'台湾噶玛兰酒厂代表作。Oloroso雪莉桶熟成，深琥珀色泽，黑巧克力、熟莓果、淡淡肉桂辛香，尾韵悠长甜美。' },
+  { name:'泰斯卡十年', emoji:'🥃', notes:'苏格兰斯凯岛单一麦芽。标志性海盐烟熏，黑胡椒辛香与蜂蜜甜感交织，海浪拍岸般的粗犷与温暖平衡。' },
+  { name:'Botanist 金酒', emoji:'🍸', notes:'苏格兰艾雷岛手工金酒。萃取22种岛上植物，花香轻盈、薄荷清凉、柑橘明亮，如漫步于赫布里底群岛的植物园。' },
+  { name:'明石蓝标', emoji:'🥃', notes:'日本兵库县白橡木蒸馏所调和威士忌。轻井泽风格的低调优雅，蜂蜜、谷物甜香，柔顺易饮的日常之选。' },
+  { name:'梦乃寒梅 古酒', emoji:'🍶', notes:'日本新潟县梦之酒造出品，长期熟成清酒。多年陈酿呈琥珀色，雪利酒般的坚果、焦糖与干果气息，醇厚圆润，余韵深邃。' },
+  { name:'小猫三只 IPA', emoji:'🍺', notes:'国内精酿厂牌出品的美式IPA。浓郁柑橘和热带果香，中度苦味，入口清爽。酒标三只小猫，可爱与个性并存。' },
+  { name:'海河 Gose', emoji:'🍺', notes:'天津海河精酿的德式古斯酸啤。乳酸发酵带来明亮酸度，芫荽与海盐点缀，微咸爽口，夏日解暑绝佳伴侣。' },
+  { name:'深喉 IPA', emoji:'🍺', notes:'国产重口味美式IPA代表。酒花投放量极大，松针、葡萄柚、树脂香气奔放，苦度直击喉咙，老饕之选。' },
+  { name:'西楚霸王 IPA', emoji:'🍺', notes:'以Citra酒花为主角的单一酒花IPA。荔枝、芒果、百香果爆裂果香，苦味收束干净，霸气外露又不失层次。' },
+  { name:'跳东湖 IPA', emoji:'🍺', notes:'新英格兰浑浊IPA风格，酒体如橙汁般浑浊。热带水果炸弹，菠萝芒果香气扑面，苦度低、口感如丝绒般顺滑。' },
+  { name:'百花深处 IPA', emoji:'🍺', notes:'北京京A精酿（Jing-A）经典款。以胡同命名，百香果、荔枝、柑橘果香奔放，苦味鲜明不尖，松脂草本层层递进，国产精酿标杆。' },
+  { name:'猴拳 IPA', emoji:'🍺', notes:'经典美式IPA入门标杆。焦糖麦芽基底配大量Cascade酒花，柑橘松木香气，苦度适中，简洁直接如猿猴挥拳。' },
+  { name:'格兰利威12年', emoji:'🥃', notes:'苏格兰斯佩塞单一麦芽威士忌。菠萝、梨子、香草荚的清新花果香，柔顺丝滑，是全球销量最高的单一麦芽之一。' },
+  { name:'百年孤独 本格烧酒', emoji:'🍶', notes:'日本宫崎县黑木本店麦烧酎，酒名致敬马尔克斯。大麦蒸馏后橡木桶熟成，烤麦、香草与木质香交织，温润深邃。' },
+  { name:'尊尼获加 黑标', emoji:'🥃', notes:'苏格兰经典调和威士忌12年。四十余种基酒调和，烟熏、太妃糖、香草与辛香料交织，威士忌爱好者的日常口粮。' },
+  { name:'Jameson', emoji:'🥃', notes:'爱尔兰三次蒸馏调和威士忌。如丝绸般顺滑，蜂蜜、烤木、淡淡花香，不泥煤的温和风格，入门与老手皆宜。' },
+  { name:'六代目百合', emoji:'🍶', notes:'日本宫崎县麦烧酒。大麦发酵蒸馏，口感清澈带微甜，如百合般洁净优雅。冷藏后纯饮或加苏打水皆妙。' },
+  { name:'秩父百花 蜂蜜酒', emoji:'🍯', notes:'日本埼玉秩父蒸馏所限定款。以当地百花蜂蜜发酵酿制，甜而不腻，花香馥郁，似液体的春日花园，小批次珍品。' },
+];
+let shuffledWines = [];
+
+function shuffleWines() {
+  const arr = [...wines];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.slice(0, 4);
+}
+
+function renderWines(items) {
+  const container = document.getElementById('wineCompact');
+  if (!container) return;
+  const show = items || (shuffledWines.length ? shuffledWines : (shuffledWines = shuffleWines()));
+  container.innerHTML = show.map(w => `
+    <div class="wine-mini">
+      <div class="wm-emoji">${w.emoji}</div>
+      <div class="wm-name">${w.name}</div>
+      <div class="wm-notes">${w.notes}</div>
+    </div>
+  `).join('');
+}
+
+function doShuffle() {
+  const btn = document.getElementById('wineShuffle');
+  btn.classList.add('shuffling');
+  shuffledWines = shuffleWines();
+  renderWines(shuffledWines);
+  // Re-observe new elements
+  document.querySelectorAll('.wine-mini').forEach(el => {
+    el.classList.add('reveal');
+    setTimeout(() => el.classList.add('visible'), 50);
+  });
+  setTimeout(() => btn.classList.remove('shuffling'), 500);
+}
+
+document.getElementById('wineShuffle').addEventListener('click', doShuffle);
+renderWines();
+
+/* ===== TECH NOTES ===== */
+const techNotes = [
+  { title:'FastAPI + PostgreSQL 性能调优：索引策略与连接池优化', summary:'从索引设计、查询优化和连接池配置三个维度，拆解 FastAPI 项目中 PostgreSQL 性能调优的实战经验。', url:'/blog/blog-1.html', date:'2026-07-05', tags:['FastAPI','PostgreSQL','性能'] },
+  { title:'LLM 幻觉检测：零额外 token 开销的新思路', summary:'基于模型内部表征的轻量级幻觉检测方法，无需额外 API 调用，代码生成任务减少 30% 幻觉。', url:'/blog/blog-5.html', date:'2026-05-12', tags:['LLM','AI','Python'] },
+  { title:'Python 生产级 Docker 镜像：从 1.2GB 到 120MB', summary:'一个 FastAPI 应用的 Docker 镜像瘦身历程——多阶段构建、Alpine 选型、依赖锁定与安全扫描。', url:'/blog/blog-4.html', date:'2026-05-27', tags:['Docker','Python','DevOps'] },
+  { title:'React 组件样式管理：借鉴 React Native 的 StyleSheet 思维', summary:'将 React Native 的声明式样式管理引入 Web 项目——useStyles hook 实现与 RSC 兼容性探讨。', url:'/blog/blog-8.html', date:'2026-04-01', tags:['React','TypeScript','CSS'] },
+];
+
+function renderTechNotes() {
+  const container = document.getElementById('blogFeatured');
+  if (!container) return;
+  container.innerHTML = techNotes.map((n, i) => `
+    <a class="technote-item" href="${n.url}" style="animation: fadeUp 0.4s ease ${i*0.08}s both;">
+      <div class="technote-title">${n.title}</div>
+      <div class="technote-summary">${n.summary}</div>
+      <div class="technote-meta">
+        <span class="technote-date">${n.date}</span>
+        ${n.tags.map(t => `<span class="tag" style="font-size:10px;padding:3px 9px">${t}</span>`).join(' ')}
+        <span class="technote-arrow">→</span>
+      </div>
+    </a>
+  `).join('');
+}
+renderTechNotes();
+
+/* ===== FADE UP ANIMATION ===== */
+const style = document.createElement('style');
+style.textContent = '@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }';
+document.head.appendChild(style);
+
+/* ============================================================
+   H5 TRICK #1: Intersection Observer — scroll reveal
+   ============================================================ */
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('.section-header, .project-card, .wine-mini, .lifestyle-col, .contact-card, .technote-item, .game-chip, .skill-group')
+    .forEach(el => { el.classList.add('reveal'); observer.observe(el); });
+})();
+
+/* ============================================================
+   H5 TRICK #3: Smart header hide on scroll down, show on scroll up
+   ============================================================ */
+(function() {
+  const header = document.getElementById('header');
+  let lastScroll = 0;
+  let ticking = false;
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const y = window.scrollY;
+        if (y < 100) { header.classList.remove('hidden'); }
+        else if (y > lastScroll + 8) { header.classList.add('hidden'); }
+        else if (y < lastScroll - 8) { header.classList.remove('hidden'); }
+        lastScroll = y;
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+</script>
+</body>
+</html>

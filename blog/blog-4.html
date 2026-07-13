@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python 生产级 Docker 镜像：从 1.2GB 到 120MB 的瘦身历程 — M1NIWA</title>
+<meta name="description" content="一个典型的 FastAPI 应用的 Docker 镜像从 1.2GB 一路瘦身到 120MB——不是魔法，是一系列工程决策的结果。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #0f1117;
+  color: #e4e6eb;
+  line-height: 1.8;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+::selection { background: rgba(59,130,246,0.3); color: #fff; }
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.blog-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 0 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 48px;
+}
+.blog-nav a {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.blog-nav a:hover { color: #3b82f6; }
+.blog-nav .nav-blog-title {
+  color: #e4e6eb;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: right;
+  max-width: 60%;
+}
+
+.article-header { margin-bottom: 40px; }
+.article-title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #e4e6eb;
+  margin-bottom: 12px;
+}
+.article-date {
+  font-size: 14px;
+  color: #9ca3af;
+}
+.article-summary {
+  margin-top: 20px;
+  padding: 20px 24px;
+  background: rgba(59,130,246,0.06);
+  border-left: 3px solid #3b82f6;
+  border-radius: 0 8px 8px 0;
+  color: #b0b8c4;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.article-body { margin-bottom: 60px; }
+.article-body p { margin-bottom: 22px; color: #d1d5db; }
+.article-body h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #e4e6eb;
+  margin: 44px 0 16px;
+  padding-left: 16px;
+  border-left: 4px solid #3b82f6;
+  line-height: 1.3;
+}
+.article-body h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #e4e6eb;
+  margin: 32px 0 12px;
+}
+.article-body strong { color: #e4e6eb; font-weight: 600; }
+.article-body a {
+  color: #3b82f6;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(59,130,246,0.3);
+  transition: border-color 0.2s;
+}
+.article-body a:hover { border-bottom-color: #3b82f6; }
+.article-body ul, .article-body ol { margin: 0 0 22px 24px; color: #d1d5db; }
+.article-body li { margin-bottom: 8px; }
+.article-body code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.88em;
+  background: rgba(0,0,0,0.35);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: #fbbf24;
+}
+.article-body pre {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 20px 24px;
+  overflow-x: auto;
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+.article-body pre code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 14px;
+  background: none;
+  padding: 0;
+  color: #e4e6eb;
+}
+.article-body blockquote {
+  border-left: 3px solid #3b82f6;
+  padding: 8px 16px;
+  margin: 0 0 22px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.blog-footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 32px 0 48px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+.blog-footer a { color: #9ca3af; text-decoration: none; transition: color 0.2s; }
+.blog-footer a:hover { color: #3b82f6; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <nav class="blog-nav">
+    <a href="/index.html">← M1NIWA</a>
+    <span class="nav-blog-title">Docker 镜像瘦身</span>
+  </nav>
+
+  <header class="article-header">
+    <h1 class="article-title">Python 生产级 Docker 镜像：从 1.2GB 到 120MB 的瘦身历程</h1>
+    <div class="article-date">2026-05-27</div>
+    <div class="article-summary">一个典型的 FastAPI 应用的 Docker 镜像从 1.2GB 一路瘦身到 120MB——不是魔法，是一系列工程决策的结果。</div>
+  </header>
+
+  <article class="article-body">
+
+    <p>第一次构建完 FastAPI 应用的 Docker 镜像时，看到 <code>1.2GB</code> 的那一刻我是崩溃的。一个几十 MB 的 Python 应用，为什么镜像会这么大？经过几轮迭代优化，最终把它瘦身到了 <code>120MB</code>——缩小了整整 10 倍。这个过程没有魔法，每一步都是可以复制的工程决策。</p>
+
+    <h2>起点：为什么是 1.2GB？</h2>
+
+    <p>最初的 Dockerfile 非常简单，也是最常见的「新手写法」：</p>
+
+    <pre><code>FROM python:3.12
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]</code></pre>
+
+    <p>问题出在 <code>python:3.12</code> 这个基础镜像——它是基于 Debian 的完整系统镜像，包含编译器、开发头文件、文档等大量运行时不需要的东西。仅基础镜像本身就接近 1GB。</p>
+
+    <h2>第一刀：多阶段构建</h2>
+
+    <p>多阶段构建是 Docker 镜像优化的核心武器。思路很简单：<strong>用一个阶段编译/构建，另一个阶段运行</strong>，只把最终产物复制到运行阶段。</p>
+
+    <pre><code># === 构建阶段 ===
+FROM python:3.12-slim AS builder
+WORKDIR /app
+COPY pyproject.toml uv.lock ./
+RUN pip install --no-cache-dir uv && \
+    uv pip install --system -r pyproject.toml
+
+# === 运行阶段 ===
+FROM python:3.12-slim
+WORKDIR /app
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+COPY src/ ./src/
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]</code></pre>
+
+    <p>仅这一步，镜像就从 <strong>1.2GB → 350MB</strong>。构建工具链（gcc、头文件等）全部留在了 builder 阶段，不会进入最终镜像。</p>
+
+    <h2>第二刀：Alpine vs Slim 的选择</h2>
+
+    <p>接下来面临一个经典选择：<code>python:3.12-slim</code>（基于 Debian）还是 <code>python:3.12-alpine</code>（基于 Alpine Linux）？</p>
+
+    <p>Alpine 镜像极小，只有 ~50MB。但代价是它使用 <strong>musl libc</strong> 而不是 glibc，某些 Python 包（特别是带 C 扩展的，如 <code>psutil</code>、<code>pillow</code>）需要额外的编译依赖，而且 musl 的 DNS 解析和线程行为与 glibc 有细微差异。</p>
+
+    <p>对于纯 Python 应用，我推荐 <strong>Slim</strong>——省去了 Alpine 的兼容性问题，同时保持了合理的体积。切换到 <code>python:3.12-slim</code> 后，基础镜像本身从 1GB 降到 130MB。再加上 <code>--no-install-recommends</code> 跳过 apt 的推荐包安装，最终基础层控制在 ~160MB。</p>
+
+    <h2>pip install 的缓存清理技巧</h2>
+
+    <p>很多人的 Dockerfile 里都有 <code>pip install</code>，但没注意到 pip 默认会缓存下载的包。在 Docker 构建中，这层缓存会被永久写入镜像层：</p>
+
+    <pre><code># ❌ 缓存会被保留在镜像中
+RUN pip install -r requirements.txt
+
+# ✅ 三个关键参数一起用
+RUN python -m pip install --no-cache-dir \
+    --no-deps \
+    -r requirements.txt && \
+    rm -rf /root/.cache/pip</code></pre>
+
+    <p><code>--no-cache-dir</code> 禁止 pip 缓存；<code>python -m pip</code> 确保使用当前 Python 解释器的 pip（避免多版本混乱）；最后的 <code>rm -rf</code> 清理任何残留。这一步通常能减少 50-100MB。</p>
+
+    <h2>为什么用 pyproject.toml 而不是 requirements.txt</h2>
+
+    <p>迁移到 <code>pyproject.toml</code> 不仅仅是跟随社区趋势，对 Docker 构建也有实际好处：</p>
+
+    <pre><code>[project]
+name = "my-api"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "sqlalchemy[asyncio]>=2.0.30",
+]
+</code></pre>
+
+    <p>配合 <code>uv.lock</code> 或 <code>poetry.lock</code>，依赖的版本完全锁定且可重现。相比之下，<code>requirements.txt</code> 没有标准的锁文件机制，<code>pip freeze</code> 输出的是完整依赖树（包括子依赖），无法区分直接依赖和传递依赖——这在审计和安全扫描时是个大问题。</p>
+
+    <h2>.dockerignore 的常见遗漏项</h2>
+
+    <p><code>.dockerignore</code> 是最容易被忽视的优化点。发送到 Docker daemon 的 build context 越大，构建越慢。以下是我经过多次教训后总结的必加项：</p>
+
+    <pre><code># 版本控制
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.venv
+venv/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# 测试 & 文档
+tests/
+docs/
+README.md
+
+# Docker 自身
+Dockerfile
+.dockerignore
+
+# 环境变量（敏感信息！）
+.env
+.env.*</code></pre>
+
+    <p>特别要注意 <code>.env</code> 文件——如果不加进 <code>.dockerignore</code>，你的数据库密码、API 密钥可能就一起打包进了镜像。这不仅是体积问题，更是<strong>安全红线</strong>。</p>
+
+    <h2>安全扫描：Trivy 的基础使用</h2>
+
+    <p>瘦身不是终点，安全同样重要。镜像变小后，用 <a href="https://github.com/aquasecurity/trivy" target="_blank" rel="noopener">Trivy</a> 扫描漏洞是 CI/CD 流水线中的标准步骤：</p>
+
+    <pre><code># 安装（一行命令）
+curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+
+# 扫描镜像
+trivy image my-api:latest
+
+# 只显示高危漏洞
+trivy image --severity HIGH,CRITICAL my-api:latest</code></pre>
+
+    <p>Alpine 镜像在 Trivy 扫描中的表现通常优于 Slim——因为软件包更少，攻击面更小。这也是 Alpine 的一个隐藏优势。</p>
+
+    <h2>最终成果</h2>
+
+    <p>完整的优化链路和每一步的体积变化：</p>
+
+    <ol>
+      <li><strong>python:3.12</strong> → 1.2GB（起点）</li>
+      <li><strong>切换到 Slim</strong> → 350MB</li>
+      <li><strong>多阶段构建</strong> → 220MB</li>
+      <li><strong>pip 缓存清理 + .dockerignore</strong> → 170MB</li>
+      <li><strong>删除不必要的系统包</strong> → 150MB</li>
+      <li><strong>最终打磨</strong> → 120MB</li>
+    </ol>
+
+    <p>从 1.2GB 到 120MB，10 倍的瘦身。每一层的优化都是可衡量、可复制的——这才是工程。下次构建镜像前，花 10 分钟审查你的 Dockerfile，说不定也能砍掉半 GB。</p>
+
+  </article>
+
+  <footer class="blog-footer">
+    <p>© 2026 M1NIWA</p>
+    <p style="margin-top: 8px;"><a href="/index.html">← 返回首页</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

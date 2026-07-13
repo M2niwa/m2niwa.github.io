@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>宠物面部识别边缘部署：RK3588 实测 48fps — M1NIWA</title>
+<meta name="description" content="在RK3588边缘设备上部署MobileNet-V3宠物面部识别模型，实测48fps推理速度，模型仅5.74MB。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg-elevated: #1a1d25;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --text: #e4e6eb;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+  --blue: #3b82f6;
+  --blue-hover: #60a5fa;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(59,130,246,0.3);color:#fff}
+.blog-nav{position:sticky;top:0;z-index:100;background:rgba(15,17,23,0.85);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--border)}
+.blog-nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1100px;margin:0 auto;padding:0 24px}
+.blog-nav-back{font-size:16px;font-weight:600;color:var(--blue);text-decoration:none;transition:color 0.2s}
+.blog-nav-back:hover{color:var(--blue-hover)}
+.blog-nav-title{font-size:14px;color:var(--text-secondary)}
+.blog-container{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+.article-header{margin-bottom:48px;padding-top:24px}
+.article-title{font-size:36px;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:12px;color:var(--text)}
+.article-date{font-size:14px;color:var(--text-tertiary)}
+.article-body{font-size:17px;line-height:1.8}
+.article-body p{margin-bottom:20px}
+.article-body h2{font-size:24px;font-weight:700;margin:48px 0 16px;padding-left:16px;border-left:3px solid var(--blue);color:var(--text)}
+.article-body ul,.article-body ol{margin-bottom:20px;padding-left:24px}
+.article-body li{margin-bottom:8px}
+.article-body strong{color:#fff;font-weight:600}
+.article-body a{color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(59,130,246,0.3);transition:border-color 0.2s}
+.article-body a:hover{border-color:var(--blue)}
+.article-body code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;background:rgba(59,130,246,0.1);color:var(--blue-hover);padding:2px 6px;border-radius:4px}
+.article-body pre{font-family:'JetBrains Mono',ui-monospace,monospace;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;overflow-x:auto;font-size:13px;line-height:1.7;color:var(--text)}
+.article-body pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.article-body blockquote{border-left:3px solid var(--blue);padding:8px 20px;margin:24px 0;color:var(--text-secondary);font-style:italic}
+.article-body hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+.blog-footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}
+.blog-footer p{font-size:13px;color:var(--text-tertiary)}
+.blog-footer a{color:var(--text-secondary);text-decoration:none;transition:color 0.2s}
+.blog-footer a:hover{color:var(--blue)}
+</style>
+</head>
+<body>
+
+<nav class="blog-nav">
+  <div class="blog-nav-inner">
+    <a href="/index.html" class="blog-nav-back">← M1NIWA</a>
+    <span class="blog-nav-title">边缘部署</span>
+  </div>
+</nav>
+
+<div class="blog-container">
+  <header class="article-header">
+    <h1 class="article-title">宠物面部识别边缘部署：RK3588 实测 48fps</h1>
+    <p class="article-date">2026-03-19</p>
+  </header>
+
+  <article class="article-body">
+    <p>在宠物身份识别这个垂直场景中，"快"和"小"是刚需。宠物店、宠物医院、社区门禁这些场景要求实时响应，无法依赖云端推理。本文将分享我在<strong>RK3588</strong>边缘设备上部署宠物面部识别模型的完整实践——从模型选型到推理优化，最终实现<strong>48fps</strong>的实时推理性能。</p>
+
+    <h2>为什么选 MobileNet-V3</h2>
+    <p>在边缘端部署视觉模型，候选方案看似很多：MobileNet 系列、ShuffleNet、EfficientNet-Lite，甚至轻量 ViT。但经过实测对比，MobileNet-V3 有三个关键优势：</p>
+    <ul>
+      <li><strong>硬件感知的 NAS 设计</strong>：V3 的架构搜索直接以移动端延迟为优化目标，不是事后补救的剪枝——SE 模块和 h-swish 激活函数都在芯片层面友好。</li>
+      <li><strong>NPU 算子兼容性</strong>：RK3588 的 NPU（6 TOPS）对 MobileNet 系列支持最成熟，conv+bn 融合、深度可分离卷积等算子都有原生加速。</li>
+      <li><strong>社区生态</strong>：ONNX→RKNN 的转换链对 MobileNet 路径经过了充分打磨，坑最少。</li>
+    </ul>
+    <p>相比之下，ShuffleNet 的 channel shuffle 操作在 NPU 上映射效率不理想，EfficientNet-Lite 的 SE 模块变体也存在兼容性问题。</p>
+
+    <h2>模型量化到 5.74MB 的全流程</h2>
+    <p>从 PyTorch 训练好的 MobileNet-V3 到最终跑在 RK3588 上的量化模型，经过了四个关键步骤：</p>
+    <ol>
+      <li><strong>PyTorch → ONNX</strong>：导出 FP32 模型，约 21.8MB。</li>
+      <li><strong>ONNX 图优化</strong>：使用 onnx-simplifier 做常量折叠和算子融合，减少冗余节点。</li>
+      <li><strong>INT8 量化校准</strong>：用 500 张宠物面部样本做校准集，将权重和激活量化到 INT8，精度损失控制在 1.8% 以内。</li>
+      <li><strong>RKNN 转换</strong>：最终模型文件 5.74MB，其中权重约 4.2MB，其余为图结构和量化参数。</li>
+    </ol>
+
+    <h2>RK3588 实测性能</h2>
+    <p>在 RK3588 开发板上，使用单核 NPU 推理，输入 224×224 的宠物面部图像：</p>
+    <ul>
+      <li><strong>纯推理时间</strong>：20.64ms/帧，约 48fps</li>
+      <li><strong>端到端（含前后处理）</strong>：26.8ms/帧，约 37fps</li>
+      <li><strong>NPU 利用率</strong>：稳定 85% 以上</li>
+    </ul>
+    <p>横向对比：同一模型在 Jetson Nano（TensorRT FP16）上约 32fps，RPi 4（ncnn FP16）上仅 8fps。RK3588 的 NPU 在单位功耗下的推理吞吐明显优于同价位竞品。</p>
+
+    <h2>内存 0.08MB 的秘密</h2>
+    <p>很多人好奇为什么运行时的额外内存占用只有 0.08MB。核心在于两点：<strong>共享权重</strong>和<strong>零拷贝推理</strong>。RKNN runtime 将模型权重直接映射到 NPU 的专用内存空间，CPU 侧不保留副本；输入输出的 DMA 缓冲区通过物理地址共享，避免了一次额外的 memcpy。这种设计在批量推理场景下尤其有价值——内存增长几乎为零。</p>
+
+    <hr>
+    <p>边缘部署不是把模型"塞进去"就完事了。从模型选型、量化策略、到 runtime 的内存管理，每一步都影响最终的用户体验。RK3588 + MobileNet-V3 的组合在宠物面部识别这个场景下，目前是我验证过性价比最高的方案。下一步计划探索多路视频流并发推理，让一台设备同时处理 4-8 路摄像头。</p>
+  </article>
+</div>
+
+<footer class="blog-footer">
+  <p>© 2026 M1NIWA · <a href="/index.html">返回首页</a> · 本文约 810 字</p>
+</footer>
+
+</body>
+</html>

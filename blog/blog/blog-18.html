@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rust 从 Python 开发者视角入门 — M1NIWA</title>
+<meta name="description" content="以 Python 开发者的视角理解 Rust：所有权 vs 引用计数、Cargo vs pip、Result vs Exception、闭包对比，以及为什么 Rust 是写 Python 扩展的最佳语言。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #0f1117;
+  color: #e4e6eb;
+  line-height: 1.8;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+::selection { background: rgba(59,130,246,0.3); color: #fff; }
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ===== TOP NAV ===== */
+.blog-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 0 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 48px;
+}
+.blog-nav a {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.blog-nav a:hover { color: #3b82f6; }
+.blog-nav .nav-blog-title {
+  color: #e4e6eb;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: right;
+  max-width: 60%;
+}
+
+/* ===== ARTICLE HEADER ===== */
+.article-header { margin-bottom: 40px; }
+.article-title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #e4e6eb;
+  margin-bottom: 12px;
+}
+.article-date {
+  font-size: 14px;
+  color: #9ca3af;
+}
+.article-summary {
+  margin-top: 20px;
+  padding: 20px 24px;
+  background: rgba(59,130,246,0.06);
+  border-left: 3px solid #3b82f6;
+  border-radius: 0 8px 8px 0;
+  color: #b0b8c4;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ===== ARTICLE BODY ===== */
+.article-body { margin-bottom: 60px; }
+.article-body p {
+  margin-bottom: 22px;
+  color: #d1d5db;
+}
+.article-body h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #e4e6eb;
+  margin: 44px 0 16px;
+  padding-left: 16px;
+  border-left: 4px solid #3b82f6;
+  line-height: 1.3;
+}
+.article-body h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #e4e6eb;
+  margin: 32px 0 12px;
+}
+.article-body strong {
+  color: #e4e6eb;
+  font-weight: 600;
+}
+.article-body a {
+  color: #3b82f6;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(59,130,246,0.3);
+  transition: border-color 0.2s;
+}
+.article-body a:hover { border-bottom-color: #3b82f6; }
+.article-body ul, .article-body ol {
+  margin: 0 0 22px 24px;
+  color: #d1d5db;
+}
+.article-body li { margin-bottom: 8px; }
+.article-body code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.88em;
+  background: rgba(0,0,0,0.35);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: #fbbf24;
+}
+.article-body pre {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 20px 24px;
+  overflow-x: auto;
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+.article-body pre code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 14px;
+  background: none;
+  padding: 0;
+  color: #e4e6eb;
+}
+.article-body blockquote {
+  border-left: 3px solid #3b82f6;
+  padding: 8px 16px;
+  margin: 0 0 22px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ===== FOOTER ===== */
+.blog-footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 32px 0 48px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+.blog-footer a {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.blog-footer a:hover { color: #3b82f6; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Top Navigation -->
+  <nav class="blog-nav">
+    <a href="/index.html">← M1NIWA</a>
+    <span class="nav-blog-title">Rust 入门</span>
+  </nav>
+
+  <!-- Article Header -->
+  <header class="article-header">
+    <h1 class="article-title">Rust 从 Python 开发者视角入门</h1>
+    <div class="article-date">2025-09-28</div>
+    <div class="article-summary">如果你是一个写了五年 Python 的开发者，Rust 的学习曲线可能比你想象的平缓。本文用 Python 的概念映射 Rust 的核心机制：所有权、Cargo、Result、闭包，以及为什么 Rust 是写 Python 扩展的最佳语言。</div>
+  </header>
+
+  <!-- Article Body -->
+  <article class="article-body">
+
+    <p>我在写了六年 Python 之后开始学 Rust。最初被 borrow checker 折磨得怀疑人生，但一旦理解其设计哲学，就会发现 Rust 和 Python 在「理念层」的对应关系比想象中更多。这篇文章写给那些想把 Rust 作为第二语言的 Python 开发者。</p>
+
+    <h2>所有权 vs Python 引用计数</h2>
+
+    <p>Python 的内存管理靠引用计数 + GC。你创建一个对象，Python 记录有多少个变量指向它，当计数归零时自动释放。Rust 则完全不一样：<strong>每个值有且只有一个所有者</strong>。当所有者离开作用域，值就被自动释放——不需要 GC，也不需要手动 free。</p>
+
+    <pre><code>// Rust：所有权转移
+let s1 = String::from("hello");
+let s2 = s1;           // s1 的所有权转移给 s2
+// println!("{}", s1); // 编译错误！s1 已经失效
+
+# Python：引用计数
+s1 = "hello"
+s2 = s1                # s1 和 s2 都指向同一个对象
+print(s1)              # 正常工作</code></pre>
+
+    <p>Rust 的这一设计看似严苛，但消除了 Python 中常见的两类问题：<strong>数据竞争</strong>（多线程同时修改）和 <strong>use-after-free</strong>。编译器在编译期就帮你检查了所有内存安全问题。</p>
+
+    <h2>Cargo vs pip：依赖管理的范式差异</h2>
+
+    <p>Python 的包管理经历了 pip → pipenv → poetry → uv 的多次迭代仍然不够统一。而 Rust 的 <code>Cargo</code> 从一开始就是「一站式」工具：构建、测试、文档生成、依赖管理、发布全部集成在一起。一个 <code>Cargo.toml</code> 文件对应 Python 的 <code>requirements.txt</code> + <code>setup.py</code> + <code>pyproject.toml</code> 的全部功能，而且提供确定性的依赖锁定（<code>Cargo.lock</code>）。</p>
+
+    <pre><code># Cargo.toml
+[package]
+name = "my_project"
+version = "0.1.0"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }</code></pre>
+
+    <h2>Result vs Exception：错误处理的哲学分歧</h2>
+
+    <p>Python 用 <code>try/except</code> 处理异常——异常可以跨越多层调用栈传播，你甚至不知道一个函数可能抛出什么异常。Rust 用 <code>Result&lt;T, E&gt;</code> 类型将错误编码进函数签名中：</p>
+
+    <pre><code>// Rust：错误是返回值的一部分，编译器强制你处理
+fn read_config(path: &str) -> Result&lt;Config, io::Error&gt; {
+    let content = std::fs::read_to_string(path)?; // ? 是语法糖：出错就提前返回
+    Ok(serde_json::from_str(&content)?)
+}</code></pre>
+
+    <p><code>?</code> 操作符是 Rust 里我最喜欢的设计——它在语义上等价于「如果出错就 return 这个错误」，但写法极其简洁。相比于 Python 中你不知道哪个调用会抛出异常，Rust 的 <code>Result</code> 让错误路径一目了然。</p>
+
+    <h2>闭包与 Python lambda 的异同</h2>
+
+    <p>Rust 的闭包在语法上与 Python lambda 非常相似，但类型系统区分了三种闭包 trait：<code>Fn</code>（不可变借用）、<code>FnMut</code>（可变借用）和 <code>FnOnce</code>（获取所有权）。这让编译器能在编译期精确推断闭包是否线程安全、是否可以多次调用。</p>
+
+    <pre><code>// Rust 闭包
+let multiply = |x, y| x * y;
+let result: i32 = multiply(3, 4); // 类型推断：i32
+
+# Python lambda
+multiply = lambda x, y: x * y
+result = multiply(3, 4)</code></pre>
+
+    <h2>为什么 Rust 适合写 Python 扩展</h2>
+
+    <p>Python 的性能瓶颈通常在于 CPU 密集型计算。用 C 写扩展太容易出错，Cython 语法又不够现代。Rust 通过 <strong>PyO3</strong> 提供了几乎零成本的 Python 互操作：直接用 Rust 写函数，编译成 <code>.so</code>/<code>.pyd</code>，Python 侧 <code>import</code> 即可使用。更重要的是，Rust 的内存安全保证让扩展不会因野指针导致 Python 解释器崩溃——这是 C 扩展最常见的灾难性 bug。</p>
+
+    <h2>总结</h2>
+
+    <p>Rust 难学吗？是的，最初几周会很难——主要是 borrow checker 让你觉得自己「不会写代码」。但度过这个阶段后，你会发现 Rust 的很多设计（所有权、Result、Cargo）带来的确定性远远超过了学习成本。对 Python 开发者来说，Rust 最实际的应用场景就是写高性能扩展，而 PyO3 让这件事变得前所未有的安全。</p>
+
+    <p style="color:#6b7280;font-size:13px;margin-top:40px;">※ 全文约 790 字</p>
+
+  </article>
+
+  <!-- Footer -->
+  <footer class="blog-footer">
+    <p>© 2025 M1NIWA</p>
+    <p style="margin-top: 8px;"><a href="/index.html">← 返回首页</a></p>
+  </footer>
+
+</div>
+</body>
+</html>

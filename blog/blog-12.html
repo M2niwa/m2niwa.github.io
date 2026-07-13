@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多光谱RGBT数据融合：水下场景的另一种解法 — M1NIWA</title>
+<meta name="description" content="探索RGB+Thermal双模态融合在水下显著性检测中的应用——热成像不受水色偏影响的独特优势。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg-elevated: #1a1d25;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --text: #e4e6eb;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+  --blue: #3b82f6;
+  --blue-hover: #60a5fa;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(59,130,246,0.3);color:#fff}
+.blog-nav{position:sticky;top:0;z-index:100;background:rgba(15,17,23,0.85);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--border)}
+.blog-nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1100px;margin:0 auto;padding:0 24px}
+.blog-nav-back{font-size:16px;font-weight:600;color:var(--blue);text-decoration:none;transition:color 0.2s}
+.blog-nav-back:hover{color:var(--blue-hover)}
+.blog-nav-title{font-size:14px;color:var(--text-secondary)}
+.blog-container{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+.article-header{margin-bottom:48px;padding-top:24px}
+.article-title{font-size:36px;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:12px;color:var(--text)}
+.article-date{font-size:14px;color:var(--text-tertiary)}
+.article-body{font-size:17px;line-height:1.8}
+.article-body p{margin-bottom:20px}
+.article-body h2{font-size:24px;font-weight:700;margin:48px 0 16px;padding-left:16px;border-left:3px solid var(--blue);color:var(--text)}
+.article-body ul,.article-body ol{margin-bottom:20px;padding-left:24px}
+.article-body li{margin-bottom:8px}
+.article-body strong{color:#fff;font-weight:600}
+.article-body a{color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(59,130,246,0.3);transition:border-color 0.2s}
+.article-body a:hover{border-color:var(--blue)}
+.article-body code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;background:rgba(59,130,246,0.1);color:var(--blue-hover);padding:2px 6px;border-radius:4px}
+.article-body pre{font-family:'JetBrains Mono',ui-monospace,monospace;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;overflow-x:auto;font-size:13px;line-height:1.7;color:var(--text)}
+.article-body pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.article-body blockquote{border-left:3px solid var(--blue);padding:8px 20px;margin:24px 0;color:var(--text-secondary);font-style:italic}
+.article-body hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+.blog-footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}
+.blog-footer p{font-size:13px;color:var(--text-tertiary)}
+.blog-footer a{color:var(--text-secondary);text-decoration:none;transition:color 0.2s}
+.blog-footer a:hover{color:var(--blue)}
+</style>
+</head>
+<body>
+
+<nav class="blog-nav">
+  <div class="blog-nav-inner">
+    <a href="/index.html" class="blog-nav-back">← M1NIWA</a>
+    <span class="blog-nav-title">RGBT 融合</span>
+  </div>
+</nav>
+
+<div class="blog-container">
+  <header class="article-header">
+    <h1 class="article-title">多光谱 RGBT 数据融合：水下场景的另一种解法</h1>
+    <p class="article-date">2026-01-27</p>
+  </header>
+
+  <article class="article-body">
+    <p>水下计算机视觉有一个绕不开的敌人：<strong>水对可见光的非线性吸收</strong>。红光在 5 米深度就衰减殆尽，蓝绿光虽然穿透更深，但会造成严重的色偏。纯 RGB 方案在这些极端条件下很容易失效。而热成像（Thermal）恰好不受水色偏影响——这为多光谱融合打开了新思路。</p>
+
+    <h2>RGB + Thermal 双模态的互补优势</h2>
+    <p>两种模态在水下场景中形成了天然互补：</p>
+    <ul>
+      <li><strong>RGB 的优势</strong>：纹理细节丰富，颜色信息对区分不同物种（鱼 vs 珊瑚）至关重要。浅水区表现优秀。</li>
+      <li><strong>Thermal 的优势</strong>：热辐射不受水体颜色影响，恒温动物（鱼类、海龟）与环境水温存在稳定温差，在浑浊水体中依然能清晰成像。</li>
+      <li><strong>互补场景</strong>：当 RGB 因为悬浮颗粒或蓝绿偏色失效时，Thermal 提供稳定的显著性线索；当 Thermal 因热均衡（鱼与环境同温）失效时，RGB 提供纹理和颜色信息。</li>
+    </ul>
+
+    <h2>RGBT 数据集的标注挑战</h2>
+    <p>RGBT 显著性检测最大的瓶颈不是模型设计，而是<strong>数据</strong>。水下 RGBT 配对数据极度稀缺——需要同时部署 RGB 相机和热成像仪在水下拍摄，设备成本高、部署困难。已有的公开数据集（如 VT5000）主要面向陆地场景，水下场景中温度梯度更小，热对比度显著降低。我们目前使用的是自采的 1200 组配对数据，标注工作仍在持续扩展中。标注的关键难点在于：<strong>Thermal 图像中的显著性边界与 RGB 不完全对齐</strong>——由于热扩散效应，热成像中的物体边缘天然比 RGB 模糊 2-5 个像素。</p>
+
+    <h2>双流网络架构设计</h2>
+    <p>我们的融合架构采用<strong>非对称双流设计</strong>：RGB 流使用较深的编码器（ResNet-34 骨干），捕获纹理和颜色特征；Thermal 流使用较浅的编码器（ResNet-18 骨干），因为热成像本身信息密度较低。两个编码器的输出在三个尺度上进行融合——浅层做通道拼接 + 1×1 卷积降维，中层做逐元素加法，深层通过<strong>交叉注意力融合模块</strong>进行选择性特征增强。</p>
+
+    <h2>注意力机制在模态融合中的作用</h2>
+    <p>交叉注意力融合模块的核心思路是：让 RGB 特征和 Thermal 特征互相查询。当一个像素在 Thermal 中温度差异显著时，注意力权重向 Thermal 倾斜；当 RGB 纹理清晰时，权重向 RGB 倾斜。这实际上是在<strong>像素级别动态选择"相信哪个模态"</strong>。</p>
+
+    <h2>初步实验结果</h2>
+    <p>在小规模水下测试集（200 组）上，RGBT 双模态方案在浑浊水体子集上相比纯 RGB 方案 F-measure 提升 5.8%。但在清澈水体子集上提升仅 0.6%——说明 Thermal 的真正价值在于"救场"极端情况，而非全面替代 RGB。</p>
+
+    <hr>
+    <p>多光谱融合不是银弹，但它在<strong>RGB 失效的场景中提供了兜底方案</strong>。对于实际部署的水下检测系统，RGBT 双模态意味着更强的鲁棒性——即使水体突然变浑浊，检测系统也不会直接"瞎掉"。这是单模态方案难以企及的容错能力。</p>
+  </article>
+</div>
+
+<footer class="blog-footer">
+  <p>© 2026 M1NIWA · <a href="/index.html">返回首页</a> · 本文约 800 字</p>
+</footer>
+
+</body>
+</html>

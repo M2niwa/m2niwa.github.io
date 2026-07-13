@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React 组件样式管理：借鉴 React Native 的 StyleSheet 思维 — M1NIWA</title>
+<meta name="description" content="将 React Native 的声明式样式管理引入 Web 项目——useStyles hook 实现与 RSC 兼容性探讨。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg-elevated: #1a1d25;
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.12);
+  --text: #e4e6eb;
+  --text-secondary: #9ca3af;
+  --text-tertiary: #6b7280;
+  --blue: #3b82f6;
+  --blue-hover: #60a5fa;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(59,130,246,0.3);color:#fff}
+.blog-nav{position:sticky;top:0;z-index:100;background:rgba(15,17,23,0.85);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--border)}
+.blog-nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1100px;margin:0 auto;padding:0 24px}
+.blog-nav-back{font-size:16px;font-weight:600;color:var(--blue);text-decoration:none;transition:color 0.2s}
+.blog-nav-back:hover{color:var(--blue-hover)}
+.blog-nav-title{font-size:14px;color:var(--text-secondary)}
+.blog-container{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+.article-header{margin-bottom:48px;padding-top:24px}
+.article-title{font-size:36px;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:12px;color:var(--text)}
+.article-date{font-size:14px;color:var(--text-tertiary)}
+.article-body{font-size:17px;line-height:1.8}
+.article-body p{margin-bottom:20px}
+.article-body h2{font-size:24px;font-weight:700;margin:48px 0 16px;padding-left:16px;border-left:3px solid var(--blue);color:var(--text)}
+.article-body ul,.article-body ol{margin-bottom:20px;padding-left:24px}
+.article-body li{margin-bottom:8px}
+.article-body strong{color:#fff;font-weight:600}
+.article-body a{color:var(--blue);text-decoration:none;border-bottom:1px solid rgba(59,130,246,0.3);transition:border-color 0.2s}
+.article-body a:hover{border-color:var(--blue)}
+.article-body code{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;background:rgba(59,130,246,0.1);color:var(--blue-hover);padding:2px 6px;border-radius:4px}
+.article-body pre{font-family:'JetBrains Mono',ui-monospace,monospace;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;overflow-x:auto;font-size:13px;line-height:1.7;color:var(--text)}
+.article-body pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.article-body blockquote{border-left:3px solid var(--blue);padding:8px 20px;margin:24px 0;color:var(--text-secondary);font-style:italic}
+.article-body hr{border:none;border-top:1px solid var(--border);margin:40px 0}
+.blog-footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}
+.blog-footer p{font-size:13px;color:var(--text-tertiary)}
+.blog-footer a{color:var(--text-secondary);text-decoration:none;transition:color 0.2s}
+.blog-footer a:hover{color:var(--blue)}
+</style>
+</head>
+<body>
+
+<nav class="blog-nav">
+  <div class="blog-nav-inner">
+    <a href="/index.html" class="blog-nav-back">← M1NIWA</a>
+    <span class="blog-nav-title">React 样式管理</span>
+  </div>
+</nav>
+
+<div class="blog-container">
+  <header class="article-header">
+    <h1 class="article-title">React 组件样式管理：借鉴 React Native 的 StyleSheet 思维</h1>
+    <p class="article-date">2026-04-01</p>
+  </header>
+
+  <article class="article-body">
+    <p>CSS-in-JS 走过了一段曲折的路。从 styled-components 的模板字面量魔法，到 Tailwind 的原子化横扫一切，再到 React Server Components 对运行时 CSS-in-JS 的"死刑判决"——前端样式方案几乎每两年就换一套范式。</p>
+    <p>但有一个生态位一直被忽视：<strong>React Native 的 StyleSheet.create</strong>。它不仅活过了所有 Web 端的样式框架迭代，还默默提供了类型安全、零运行时成本、声明式 API 的最佳组合。本文将这种思维引入 Web React 项目。</p>
+
+    <h2>CSS-in-JS 的演进与困境</h2>
+    <p>回顾一下这条路的几个关键节点：</p>
+    <ul>
+      <li><strong>styled-components / Emotion（2017-2020）</strong>：运行时注入样式标签，提供动态主题和 props 插值，但 SSR 场景下容易出现样式闪烁（FOUC），且 Bundle 体积不小。</li>
+      <li><strong>Tailwind CSS（2020-至今）</strong>：原子化 utility class 消灭了样式命名的痛苦，但模板中的类名字符串会迅速膨胀，复杂组件的可读性在 10+ 个 class 后急剧下降。</li>
+      <li><strong>CSS Modules / Vanilla Extract（2022-至今）</strong>：编译时方案，零运行时开销，完美适配 RSC。但 API 设计偏向传统 CSS 文件，缺少组件化组织能力。</li>
+    </ul>
+    <p>每个方案都在"组件封装性"和"运行时成本"之间做取舍。而 React Native 的 StyleSheet 恰好同时满足两者——它既不是运行时方案，也不依赖类名字符串拼接。</p>
+
+    <h2>StyleSheet.create 的核心理念</h2>
+    <p>React Native 的样式系统有几个关键设计决策值得学习：</p>
+    <ul>
+      <li><strong>一次定义，多次引用</strong>：样式对象在组件外部用 <code>StyleSheet.create()</code> 定义，组件内部通过 <code>styles.container</code> 引用。定义和消费分离，避免了模板中堆积大量类名的可读性问题。</li>
+      <li><strong>类型推导</strong>：配合 TypeScript 的 <code>const</code> 断言，样式对象的 key 可以做到自动补全和类型检查。修改样式名后编译器会立即提示所有引用点。</li>
+      <li><strong>零运行时</strong>：<code>StyleSheet.create</code> 在 JS 引擎层只是冻结对象 + 分配 ID，不涉及 CSSOM 操作，天然适合并发渲染。</li>
+    </ul>
+
+    <h2>一个 useStyles hook 的实现</h2>
+    <p>将这种模式移植到 Web 端并不复杂。核心思路是：用 TypeScript 的泛型约束确保样式对象的类型安全，同时保持 API 与 React Native 一致。</p>
+
+    <pre><code>import { useMemo } from 'react';
+
+type Styles&lt;T&gt; = { readonly [K in keyof T]: React.CSSProperties };
+
+function createStyles&lt;T extends Record&lt;string, React.CSSProperties&gt;&gt;(
+  styles: T
+): Styles&lt;T&gt; {
+  return Object.freeze(styles) as Styles&lt;T&gt;;
+}
+
+function useStyles&lt;T extends Record&lt;string, React.CSSProperties&gt;&gt;(
+  factory: () =&gt; T
+): Styles&lt;T&gt; {
+  return useMemo(() =&gt; createStyles(factory()), []);
+}
+
+// 使用示例
+const useCardStyles = () =&gt; useStyles(() =&gt; ({
+  container: {
+    display: 'flex',
+    padding: '24px',
+    borderRadius: '10px',
+    background: 'var(--bg-card)',
+    border: '1px solid var(--border)',
+  },
+  title: {
+    fontSize: '18px',
+    fontWeight: 600,
+    color: 'var(--text)',
+  },
+}));
+
+function Card({ title }: { title: string }) {
+  const s = useCardStyles();
+  return (
+    &lt;div style={s.container}&gt;
+      &lt;h3 style={s.title}&gt;{title}&lt;/h3&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+    <p>相比 Tailwind 的 <code>className="flex p-6 rounded-xl bg-gray-800 border border-gray-700"</code>，StyleSheet 模式的优势在于：样式被赋予<strong>语义化名称</strong>（container / title），而不是视觉属性的机械罗列。当设计系统需要调整间距或圆角时，只需修改一处定义，所有消费点自动更新。</p>
+
+    <h2>与 React Server Components 的兼容性</h2>
+    <p>RSC 的核心约束是<strong>不能使用 hooks 和浏览器 API</strong>。而 useStyles 底层依赖 <code>useMemo</code>，自然无法在 Server Component 中运行。解决方案有两种：</p>
+    <ul>
+      <li><strong>"use client" 边界</strong>：将使用 useStyles 的组件标记为 Client Component，这在交互密集型组件（表单、弹窗、动画）上完全合理。</li>
+      <li><strong>静态样式提取</strong>：对于纯展示型组件，可以在模块顶层直接调用 <code>createStyles()</code>（不经过 hook），生成的样式对象是纯数据，可以安全地在 RSC 中传递和使用。</li>
+    </ul>
+    <p>这种分层策略让我们在不同场景中选择最优方案：需要交互的组件享受类型安全的动态样式，纯展示组件获得零 JS bundle 的 RSC 优势。</p>
+
+    <h2>实际项目中的迁移体验</h2>
+    <p>在一个中等规模的内部组件库（约 40 个组件）中，我们从 Tailwind 切换到这套方案后：</p>
+    <ul>
+      <li>组件文件的行数平均<strong>减少 15%</strong>（主要来自长类名字符串的消除）</li>
+      <li>样式相关的 TypeScript 编译错误<strong>减少到零</strong>（之前 Tailwind 的类名拼写错误只能在浏览器中捕获）</li>
+      <li>新成员上手速度明显提升——不需要记忆 Tailwind 的类名映射，IDE 自动补全即可引导</li>
+    </ul>
+    <p>当然也有取舍：从工具链角度，失去了 Tailwind 的 tree-shaking 和 JIT 编译优势。但对于组件库这种样式定义集中、重用率高的场景，手动管理 CSS 变量的方案已经足够高效。</p>
+
+    <hr>
+
+    <p>React Native 的 StyleSheet 不是一个"移动端的妥协方案"，而是一套<strong>经过千万级应用验证的组件样式方法论</strong>。在 React 生态被 Tailwind 全面笼罩的今天，重新审视这套 API 的设计哲学，或许能帮我们跳出"类名 vs CSS-in-JS"的二元对立，找到第三条路。</p>
+  </article>
+</div>
+
+<footer class="blog-footer">
+  <p>© 2026 M1NIWA · <a href="/index.html">返回首页</a></p>
+</footer>
+
+</body>
+</html>

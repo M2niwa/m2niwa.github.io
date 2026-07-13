@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PostgreSQL JSON索引与全文搜索优化 — M1NIWA</title>
+<meta name="description" content="深入 PostgreSQL JSON 索引（GIN vs GiST、jsonb_path_ops）、全文搜索配置（tsvector、中文分词 pg_jieba），以及与 Elasticsearch 的取舍策略。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #0f1117;
+  color: #e4e6eb;
+  line-height: 1.8;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+::selection { background: rgba(59,130,246,0.3); color: #fff; }
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ===== TOP NAV ===== */
+.blog-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 0 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 48px;
+}
+.blog-nav a {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.blog-nav a:hover { color: #3b82f6; }
+.blog-nav .nav-blog-title {
+  color: #e4e6eb;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: right;
+  max-width: 60%;
+}
+
+/* ===== ARTICLE HEADER ===== */
+.article-header { margin-bottom: 40px; }
+.article-title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #e4e6eb;
+  margin-bottom: 12px;
+}
+.article-date {
+  font-size: 14px;
+  color: #9ca3af;
+}
+.article-summary {
+  margin-top: 20px;
+  padding: 20px 24px;
+  background: rgba(59,130,246,0.06);
+  border-left: 3px solid #3b82f6;
+  border-radius: 0 8px 8px 0;
+  color: #b0b8c4;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ===== ARTICLE BODY ===== */
+.article-body { margin-bottom: 60px; }
+.article-body p {
+  margin-bottom: 22px;
+  color: #d1d5db;
+}
+.article-body h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #e4e6eb;
+  margin: 44px 0 16px;
+  padding-left: 16px;
+  border-left: 4px solid #3b82f6;
+  line-height: 1.3;
+}
+.article-body h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #e4e6eb;
+  margin: 32px 0 12px;
+}
+.article-body strong {
+  color: #e4e6eb;
+  font-weight: 600;
+}
+.article-body a {
+  color: #3b82f6;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(59,130,246,0.3);
+  transition: border-color 0.2s;
+}
+.article-body a:hover { border-bottom-color: #3b82f6; }
+.article-body ul, .article-body ol {
+  margin: 0 0 22px 24px;
+  color: #d1d5db;
+}
+.article-body li { margin-bottom: 8px; }
+.article-body code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.88em;
+  background: rgba(0,0,0,0.35);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: #fbbf24;
+}
+.article-body pre {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 20px 24px;
+  overflow-x: auto;
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+.article-body pre code {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 14px;
+  background: none;
+  padding: 0;
+  color: #e4e6eb;
+}
+.article-body blockquote {
+  border-left: 3px solid #3b82f6;
+  padding: 8px 16px;
+  margin: 0 0 22px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+/* ===== FOOTER ===== */
+.blog-footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 32px 0 48px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+.blog-footer a {
+  color: #9ca3af;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.blog-footer a:hover { color: #3b82f6; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Top Navigation -->
+  <nav class="blog-nav">
+    <a href="/index.html">← M1NIWA</a>
+    <span class="nav-blog-title">PostgreSQL JSON 索引</span>
+  </nav>
+
+  <!-- Article Header -->
+  <header class="article-header">
+    <h1 class="article-title">PostgreSQL JSON索引与全文搜索优化</h1>
+    <div class="article-date">2025-10-15</div>
+    <div class="article-summary">PostgreSQL 的 JSONB 和全文搜索是两个被严重低估的特性。本文从 GIN vs GiST 索引选择、jsonb_path_ops 优化、中文分词方案到与 Elasticsearch 的取舍，给出完整的生产级选型指南。</div>
+  </header>
+
+  <!-- Article Body -->
+  <article class="article-body">
+
+    <p>很多团队一提到「JSON 查询」或「全文搜索」就直接上 MongoDB 或 Elasticsearch，却忽略了 PostgreSQL 原生就能做得很好的事实。本文将拆解这两个特性在生产环境中的正确使用姿势。</p>
+
+    <h2>GIN vs GiST：JSONB 索引的选择</h2>
+
+    <p><code>jsonb</code> 类型支持两种索引：<strong>GIN</strong> 和 <strong>GiST</strong>。GIN（Generalized Inverted Index）将 JSON 对象中的每个 key 和 value 都拆分为索引条目，查询速度快但写入开销大。GiST（Generalized Search Tree）是平衡树结构，写入更快但查询略慢。</p>
+
+    <p>选型原则很简单：<strong>读多写少用 GIN，写多读少用 GiST</strong>。大多数 API 服务是读多写少的场景，GIN 是默认选择。</p>
+
+    <pre><code>-- GIN 索引（推荐）
+CREATE INDEX idx_data_gin ON products USING GIN (metadata jsonb_path_ops);
+
+-- GiST 索引（写入密集型场景）
+CREATE INDEX idx_data_gist ON products USING GiST (metadata);</code></pre>
+
+    <h2>jsonb_path_ops：更小更快的 GIN</h2>
+
+    <p>注意到上面的示例中用了 <code>jsonb_path_ops</code> 而不是默认的 <code>jsonb_ops</code>。区别在于：默认的 GIN 会为 JSON 的 key 和 value 各创建一个索引条目，而 <code>jsonb_path_ops</code> 只索引 value——它假设你总是通过 <code>@></code>（包含）操作符查询。如果你的查询模式都是「找某个 key 包含指定 value」，<code>jsonb_path_ops</code> 可以节省约 40% 的索引空间并提升查询速度。</p>
+
+    <pre><code>-- jsonb_path_ops 专为这种查询优化
+SELECT * FROM products
+WHERE metadata @> '{"brand": "Apple", "color": "black"}';</code></pre>
+
+    <h2>全文搜索：tsvector 与中文分词</h2>
+
+    <p>PostgreSQL 的全文搜索基于 <code>tsvector</code>（文档向量）和 <code>tsquery</code>（查询向量）。标准的 <code>to_tsvector('english', text)</code> 对英文工作得很好，但遇到中文就失效了——因为中文词语之间没有空格分隔。</p>
+
+    <p>解决方案是安装 <strong>pg_jieba</strong> 扩展，它使用结巴分词为中文文本生成 tsvector。配置步骤：安装扩展、创建分词配置、创建 GIN 索引：</p>
+
+    <pre><code>-- 安装 pg_jieba（需先编译安装）
+CREATE EXTENSION pg_jieba;
+
+-- 创建中文搜索配置
+CREATE TEXT SEARCH CONFIGURATION zh (PARSER = jieba);
+
+-- 在文章表上创建全文搜索索引
+CREATE INDEX idx_articles_fts ON articles
+USING GIN (to_tsvector('zh', title || ' ' || content));</code></pre>
+
+    <p>查询时使用 <code>plainto_tsquery</code> 或 <code>phraseto_tsquery</code>，前者做 OR 匹配，后者做短语匹配。</p>
+
+    <h2>PostgreSQL vs Elasticsearch：什么时候该分离</h2>
+
+    <p>PostgreSQL 的全文搜索足以应对百万级文档的搜索需求。但在以下场景建议引入 Elasticsearch：数据量超过千万级且对搜索延迟有严格要求；需要复杂的相关性打分（BM25、自定义打分函数）；需要聚合分析（facet、histogram）；或者需要分布式搜索集群。一个务实的策略是：<strong>先从 PostgreSQL 开始，当搜索成为性能瓶颈时再迁移</strong>——这比一开始就维护两套存储要省心得多。</p>
+
+    <h2>总结</h2>
+
+    <p>PostgreSQL 的 JSONB 索引和全文搜索是两个「低调但强大」的特性。GIN + jsonb_path_ops 的组合能高效处理 JSON 查询，pg_jieba 让中文全文搜索成为可能。不要因为 Elasticsearch 名气大就跳过 PostgreSQL 原生的搜索能力——在很多场景下，它已经够用了。</p>
+
+    <p style="color:#6b7280;font-size:13px;margin-top:40px;">※ 全文约 740 字</p>
+
+  </article>
+
+  <!-- Footer -->
+  <footer class="blog-footer">
+    <p>© 2025 M1NIWA</p>
+    <p style="margin-top: 8px;"><a href="/index.html">← 返回首页</a></p>
+  </footer>
+
+</div>
+</body>
+</html>
