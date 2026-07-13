@@ -121,16 +121,29 @@ body::before {
 }
 .header-social a:hover { color: var(--blue); }
 
-/* Language toggle */
-.lang-toggle {
-  background: none; border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 4px 10px;
-  font-size: 12px; font-weight: 600; color: var(--text-secondary);
-  cursor: pointer; transition: all 0.2s; font-family: inherit;
-  letter-spacing: 0.04em;
+/* Language sliding switch */
+.lang-switch-wrap { margin-bottom: 16px; }
+.lang-switch {
+  position: relative; display: inline-flex; align-items: center;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 9999px; padding: 3px; cursor: pointer;
+  transition: all 0.2s; font-family: inherit;
 }
-.lang-toggle:hover { border-color: var(--blue); color: var(--blue); }
-.lang-toggle.en { color: var(--blue); border-color: var(--blue); }
+.lang-switch:hover { border-color: var(--border-hover); }
+.lang-option {
+  position: relative; z-index: 1;
+  padding: 4px 16px; font-size: 13px; font-weight: 600;
+  color: var(--text-tertiary); transition: color 0.3s;
+  pointer-events: none; user-select: none;
+}
+.lang-option.active { color: #fff; }
+.lang-slider {
+  position: absolute; top: 3px; left: 3px;
+  width: calc(50% - 3px); height: calc(100% - 6px);
+  background: var(--blue); border-radius: 9999px;
+  transition: transform 0.3s var(--ease);
+}
+.lang-switch.en .lang-slider { transform: translateX(100%); }
 
 /* Mobile nav toggle */
 .menu-toggle {
@@ -620,7 +633,6 @@ html.en .tag { font-size: 11px; }
       <a href="#contact" data-en="Contact">联系</a>
     </nav>
     <div class="header-social">
-      <button class="lang-toggle" id="langToggle" title="Switch Language">中</button>
       <a href="https://github.com/m2niwa" target="_blank" rel="noopener" title="GitHub">🐙</a>
       <button class="menu-toggle" id="menuToggle" aria-label="菜单">☰</button>
     </div>
@@ -633,6 +645,13 @@ html.en .tag { font-size: 11px; }
     <div class="hero">
       <div class="hero-avatar">M</div>
       <div class="hero-content">
+        <div class="lang-switch-wrap">
+          <button class="lang-switch" id="langSwitch" aria-label="中英文切换">
+            <span class="lang-option active" data-lang="zh">中</span>
+            <span class="lang-option" data-lang="en">EN</span>
+            <span class="lang-slider"></span>
+          </button>
+        </div>
         <h1 class="hero-name" data-en="M1NIWA">M1NIWA</h1>
         <p class="hero-bio" data-en="Huo Lingzhi · AI Dev & Game Designer · <br>DIY Enthusiast · Olfactory Explorer">霍凌志 · AI 开发 & 游戏策划 · <br>DIY 爱好者 · 嗅觉探索者</p>
         <div class="hero-tags">
@@ -1069,15 +1088,16 @@ document.head.appendChild(style);
    ============================================================ */
 (function() {
   const root = document.getElementById('rootHtml');
-  const btn = document.getElementById('langToggle');
+  const sw = document.getElementById('langSwitch');
   let lang = localStorage.getItem('lang') || 'zh';
 
   function applyLang(l) {
     root.lang = l;
     root.classList.toggle('en', l === 'en');
-    btn.textContent = l === 'en' ? 'EN' : '中';
-    btn.classList.toggle('en', l === 'en');
-    // Swap all data-en elements
+    sw.classList.toggle('en', l === 'en');
+    sw.querySelectorAll('.lang-option').forEach(opt => {
+      opt.classList.toggle('active', opt.dataset.lang === l);
+    });
     document.querySelectorAll('[data-en]').forEach(el => {
       if (l === 'en' && el.dataset.en) {
         if (!el.dataset.zh) el.dataset.zh = el.textContent;
@@ -1086,7 +1106,6 @@ document.head.appendChild(style);
         el.textContent = el.dataset.zh;
       }
     });
-    // Re-render dynamic content
     if (typeof renderWines === 'function') {
       shuffledWines = [];
       renderWines();
@@ -1095,7 +1114,7 @@ document.head.appendChild(style);
     localStorage.setItem('lang', l);
   }
 
-  btn.addEventListener('click', () => {
+  sw.addEventListener('click', () => {
     lang = lang === 'zh' ? 'en' : 'zh';
     applyLang(lang);
   });
