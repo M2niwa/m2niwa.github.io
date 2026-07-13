@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" id="rootHtml">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -120,6 +120,17 @@ body::before {
   transition: color 0.2s; text-decoration: none;
 }
 .header-social a:hover { color: var(--blue); }
+
+/* Language toggle */
+.lang-toggle {
+  background: none; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 4px 10px;
+  font-size: 12px; font-weight: 600; color: var(--text-secondary);
+  cursor: pointer; transition: all 0.2s; font-family: inherit;
+  letter-spacing: 0.04em;
+}
+.lang-toggle:hover { border-color: var(--blue); color: var(--blue); }
+.lang-toggle.en { color: var(--blue); border-color: var(--blue); }
 
 /* Mobile nav toggle */
 .menu-toggle {
@@ -550,6 +561,18 @@ body::before {
   .tag { font-size: 11px; padding: 4px 10px; }
 }
 
+/* English mode adjustments */
+html.en .hero-name { font-size: 42px; }
+html.en .hero-bio { font-size: 16px; }
+html.en .section-title { font-size: 32px; }
+html.en .section-desc { font-size: 15px; }
+html.en .technote-title { font-size: 16px; }
+html.en .technote-summary { font-size: 13px; }
+html.en .lifestyle-text { font-size: 13px; }
+html.en .wine-mini .wm-name { font-size: 12px; }
+html.en .wine-mini .wm-notes { font-size: 10px; }
+html.en .tag { font-size: 11px; }
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -589,14 +612,15 @@ body::before {
     <a href="#hero" class="header-logo">M<span>1</span>NIWA</a>
     <nav class="header-nav" id="headerNav">
       <a href="#hero" class="active">关于</a>
-      <a href="#skills">技能</a>
-      <a href="#technotes">博客</a>
-      <a href="#projects">项目</a>
-      <a href="#lifestyle">兴趣</a>
-      <a href="#diy">DIY</a>
-      <a href="#contact">联系</a>
+      <a href="#skills" data-en="Skills">技能</a>
+      <a href="#technotes" data-en="Blog">博客</a>
+      <a href="#projects" data-en="Projects">项目</a>
+      <a href="#lifestyle" data-en="Lifestyle">兴趣</a>
+      <a href="#diy" data-en="DIY">DIY</a>
+      <a href="#contact" data-en="Contact">联系</a>
     </nav>
     <div class="header-social">
+      <button class="lang-toggle" id="langToggle" title="Switch Language">中</button>
       <a href="https://github.com/m2niwa" target="_blank" rel="noopener" title="GitHub">🐙</a>
       <button class="menu-toggle" id="menuToggle" aria-label="菜单">☰</button>
     </div>
@@ -609,8 +633,8 @@ body::before {
     <div class="hero">
       <div class="hero-avatar">M</div>
       <div class="hero-content">
-        <h1 class="hero-name">M1NIWA</h1>
-        <p class="hero-bio">霍凌志 · AI 开发 & 游戏策划 · <br>DIY 爱好者 · 嗅觉探索者</p>
+        <h1 class="hero-name" data-en="M1NIWA">M1NIWA</h1>
+        <p class="hero-bio" data-en="Huo Lingzhi · AI Dev & Game Designer · <br>DIY Enthusiast · Olfactory Explorer</p>">霍凌志 · AI 开发 & 游戏策划 · <br>DIY 爱好者 · 嗅觉探索者</p>
         <div class="hero-tags">
           <span class="tag">Agent</span>
           <span class="tag">LLM & LoRA</span>
@@ -632,12 +656,12 @@ body::before {
   <div class="container">
     <div class="section-header">
       <div class="section-label">Skills</div>
-      <h2 class="section-title">技术栈与能力</h2>
-      <p class="section-desc">从深度学习到后端开发，从 Agent 构建到硬件 DIY</p>
+      <h2 class="section-title"data-en="Tech Stack">技术栈与能力</h2>
+      <p class="section-desc">data-en="From deep learning to backend, from agents to hardware DIY">从深度学习到后端开发，从 Agent 构建到硬件 DIY</p>
     </div>
     <div class="skills-grid">
       <div class="skill-group">
-        <div class="skill-group-title">AI & 深度学习</div>
+        <div class="skill-group-title"data-en="AI & Deep Learning">AI & 深度学习</div>
         <div class="skill-item"><span class="skill-name">CV / CV 模型</span><div class="skill-track"><div class="skill-fill" style="width:70%"></div></div></div>
         <div class="skill-item"><span class="skill-name">Agent 构建</span><div class="skill-track"><div class="skill-fill" style="width:65%"></div></div></div>
         <div class="skill-item"><span class="skill-name">LLM / LoRA</span><div class="skill-track"><div class="skill-fill" style="width:60%"></div></div></div>
@@ -646,14 +670,14 @@ body::before {
         <div class="skill-item"><span class="skill-name">LangChain / Neo4j</span><div class="skill-track"><div class="skill-fill" style="width:40%"></div></div></div>
       </div>
       <div class="skill-group">
-        <div class="skill-group-title">开发 & 工具</div>
+        <div class="skill-group-title"data-en="Dev & Tools">开发 & 工具</div>
         <div class="skill-item"><span class="skill-name">Python</span><div class="skill-track"><div class="skill-fill" style="width:80%"></div></div></div>
         <div class="skill-item"><span class="skill-name">React</span><div class="skill-track"><div class="skill-fill" style="width:50%"></div></div></div>
         <div class="skill-item"><span class="skill-name">Flask / FastAPI</span><div class="skill-track"><div class="skill-fill" style="width:60%"></div></div></div>
         <div class="skill-item"><span class="skill-name">Docker</span><div class="skill-track"><div class="skill-fill" style="width:60%"></div></div></div>
         <div class="skill-item"><span class="skill-name">C / C++ / Java</span><div class="skill-track"><div class="skill-fill" style="width:50%"></div></div></div>
         <div class="skill-item"><span class="skill-name">ArkTS</span><div class="skill-track"><div class="skill-fill" style="width:40%"></div></div></div>
-        <div class="skill-group-title" style="margin-top:28px">工具 & 协作</div>
+        <div class="skill-group-title" style="margin-top:28px"data-en="Tools & Collab">工具 & 协作</div>
         <div class="skill-item"><span class="skill-name">SVN</span><div class="skill-track"><div class="skill-fill" style="width:100%"></div></div></div>
         <div class="skill-item"><span class="skill-name">Git / GitHub</span><div class="skill-track"><div class="skill-fill" style="width:80%"></div></div></div>
         <div class="skill-item"><span class="skill-name">Excel / 数据透视</span><div class="skill-track"><div class="skill-fill" style="width:80%"></div></div></div>
@@ -668,14 +692,14 @@ body::before {
   <div class="container">
     <div class="section-header">
       <div class="section-label">Writing</div>
-      <h2 class="section-title">技术博客</h2>
-      <p class="section-desc">记录项目中学到的工程经验与技术思考</p>
+      <h2 class="section-title"data-en="Tech Blog">技术博客</h2>
+      <p class="section-desc">data-en="Engineering lessons and technical reflections from real projects">记录项目中学到的工程经验与技术思考</p>
     </div>
     <div class="blog-featured" id="blogFeatured">
       <!-- JS renders 4 featured posts -->
     </div>
     <div class="blog-more-wrap">
-      <a href="/blog/index.html" class="blog-more-btn">查看全部 25 篇文章 →</a>
+      <a href="/blog/index.html" class="blog-more-btn">data-en="View all 25 posts →">查看全部 25 篇文章 →</a>
     </div>
   </div>
 </section>
@@ -685,8 +709,8 @@ body::before {
   <div class="container">
     <div class="section-header">
       <div class="section-label">Projects</div>
-      <h2 class="section-title">精选项目</h2>
-      <p class="section-desc">AI · 游戏 · 嵌入式 · 工具开发</p>
+      <h2 class="section-title"data-en="Featured Projects">精选项目</h2>
+      <p class="section-desc">data-en="AI · Gaming · Embedded · Tooling">AI · 游戏 · 嵌入式 · 工具开发</p>
     </div>
     <div class="projects-grid">
       <div class="project-card">
@@ -752,22 +776,22 @@ body::before {
   <div class="container">
     <div class="section-header">
       <div class="section-label">Lifestyle</div>
-      <h2 class="section-title">工作之外</h2>
-      <p class="section-desc">威士忌品鉴 · 精酿收藏 · 深度策略玩家</p>
+      <h2 class="section-title"data-en="Beyond Work">工作之外</h2>
+      <p class="section-desc">data-en="Whisky tasting · Craft beer · Strategy gamer">威士忌品鉴 · 精酿收藏 · 深度策略玩家</p>
     </div>
     <div class="lifestyle-grid">
       <div class="lifestyle-col">
-        <h3 class="lifestyle-subtitle">🥃 酒柜精选</h3>
+        <h3 class="lifestyle-subtitle"data-en="🥃 Wine Picks">🥃 酒柜精选</h3>
         <div class="wine-compact" id="wineCompact">
           <!-- JS renders 4 items -->
         </div>
         <button class="wine-shuffle-btn" id="wineShuffle" title="换一批">
-          <span class="shuffle-icon">🎲</span> 换一批
+          <span class="shuffle-icon"data-en="🎲 Shuffle">🎲</span> 换一批
         </button>
       </div>
       <div class="lifestyle-col">
-        <h3 class="lifestyle-subtitle">🎮 游戏与竞技</h3>
-        <p class="lifestyle-text">六年游戏策划视角，超千小时策略游戏积累。守望先锋业余赛事经历，兼任校队教练。擅长数值框架拆解、竞品分析。</p>
+        <h3 class="lifestyle-subtitle"data-en="🎮 Gaming & Esports">🎮 游戏与竞技</h3>
+        <p class="lifestyle-text">data-en="Six years in game design, 1000+ hours in strategy games. OW amateur competition experience, team coach. Skilled in number crunching and competitive analysis.">六年游戏策划视角，超千小时策略游戏积累。守望先锋业余赛事经历，兼任校队教练。擅长数值框架拆解、竞品分析。</p>
         <div class="chips-grid">
           <div class="game-chip">守望先锋</div><div class="game-chip">DOTA2</div>
           <div class="game-chip">CS</div><div class="game-chip">APEX</div>
@@ -785,8 +809,8 @@ body::before {
   <div class="container">
     <div class="section-header">
       <div class="section-label">Workshop</div>
-      <h2 class="section-title">DIY 项目日志</h2>
-      <p class="section-desc">硬件 · 嵌入式 · 自造</p>
+      <h2 class="section-title"data-en="DIY Project Log">DIY 项目日志</h2>
+      <p class="section-desc">data-en="Hardware · Embedded · DIY">硬件 · 嵌入式 · 自造</p>
     </div>
     <div class="terminal">
       <div class="line"><span class="prompt">root@workshop:~$</span> <span class="cmd">cat projects.log</span></div>
@@ -808,29 +832,29 @@ body::before {
   <div class="container">
     <div class="section-header">
       <div class="section-label">Connect</div>
-      <h2 class="section-title">联系我</h2>
-      <p class="section-desc">欢迎技术交流、项目合作、或一起喝一杯</p>
+      <h2 class="section-title"data-en="Contact Me">联系我</h2>
+      <p class="section-desc">data-en="Open to tech talks, collaboration, or grabbing a drink">欢迎技术交流、项目合作、或一起喝一杯</p>
     </div>
     <div class="contact-grid">
       <a class="contact-card" href="https://github.com/m2niwa" target="_blank" rel="noopener">
         <div class="contact-icon">🐙</div>
-        <div class="contact-label">GitHub</div>
+        <div class="contact-label"data-en="GitHub">GitHub</div>
         <div class="contact-value">m2niwa</div>
       </a>
       <div class="contact-card">
         <div class="contact-icon">📧</div>
-        <div class="contact-label">Email</div>
+        <div class="contact-label"data-en="Email">Email</div>
         <div class="contact-value">miniwakazeha@outlook.com</div>
       </div>
       <div class="contact-card">
         <div class="contact-icon">🌍</div>
-        <div class="contact-label">所在地</div>
-        <div class="contact-value">中国 · 深圳 / 武汉</div>
+        <div class="contact-label"data-en="Location">所在地</div>
+        <div class="contact-value"data-en="Shenzhen / Wuhan, China">中国 · 深圳 / 武汉</div>
       </div>
       <div class="contact-card">
         <div class="contact-icon">💼</div>
-        <div class="contact-label">职位方向</div>
-        <div class="contact-value">AI 开发 / 游戏策划</div>
+        <div class="contact-label"data-en="Role">职位方向</div>
+        <div class="contact-value"data-en="AI Dev / Game Design">AI 开发 / 游戏策划</div>
       </div>
     </div>
   </div>
@@ -905,10 +929,32 @@ const wines = [
   { name:'六代目百合', emoji:'🍶', notes:'鹿儿岛芋烧酎。甘薯蒸馏，酒体醇厚浓烈，入口有炙烤红薯的焦香与泥土感，尾韵温暖有力。六代传承的匠心之作。' },
   { name:'秩父百花 蜂蜜酒', emoji:'🍯', notes:'日本埼玉秩父蒸馏所限定款。以当地百花蜂蜜发酵酿制，甜而不腻，花香馥郁，似液体的春日花园，小批次珍品。' },
 ];
+
+const winesEn = [
+  { name:'Kavalan Classic Sherry Oak', emoji:'🥃', notes:'Taiwan\'s Kavalan Distillery. Oloroso sherry cask matured, deep amber, dark chocolate, dried berries, cinnamon spice, long sweet finish.' },
+  { name:'Talisker 10 Year', emoji:'🥃', notes:'Isle of Skye single malt. Signature sea-salt smoke, black pepper spice meets honey sweetness — rugged yet balanced, like waves crashing on shore.' },
+  { name:'Botanist Gin', emoji:'🍸', notes:'Islay handcrafted gin. 22 local botanicals, delicate floral notes, cool mint, bright citrus — a walk through Hebridean gardens in a glass.' },
+  { name:'Akashi Blue Label', emoji:'🥃', notes:'Hyogo Prefecture blended whisky. Karuizawa-esque understated elegance, honey, grain sweetness, smooth daily sipper from Japan.' },
+  { name:'Yumeno Kankobai Koshu', emoji:'🍶', notes:'Niigata aged sake. Amber hue from years of aging, sherry-like nuts, caramel and dried fruit. Rich, round, profound finish.' },
+  { name:'Three Kittens IPA', emoji:'🍺', notes:'Ise Kadoya (Japan) American IPA. Bursting citrus and tropical fruit, moderate bitterness, crisp and clean. Cute kittens, serious brew.' },
+  { name:'Haihe Gose', emoji:'🍺', notes:'Tianjin Truman Brewing Gose. Lactic acidity meets coriander and sea salt — bright, slightly savory, the ultimate summer thirst-quencher.' },
+  { name:'Deep Throat IPA', emoji:'🍺', notes:'Heavyweight Chinese IPA. Massive hop load — pine needles, grapefruit, resin. Bitter punch straight to the throat. For hop veterans only.' },
+  { name:'Citra Overlord IPA', emoji:'🍺', notes:'Single-hop Citra showcase. Lychee, mango, passionfruit explosion. Clean bitter finish. Bold name, bold brew.' },
+  { name:'Tiaodonghu IPA', emoji:'🍺', notes:'NE-style hazy IPA, orange-juice body. Tropical fruit bomb — pineapple and mango. Low bitterness, silky mouthfeel. Wuhan craft icon.' },
+  { name:'Baihua Shendu IPA', emoji:'🍺', notes:'Beijing Jing-A classic. Named after a hutong alley. Passionfruit, lychee, citrus — bright bitterness, pine and herbal layers. China craft benchmark.' },
+  { name:'Monkey Fist IPA', emoji:'🍺', notes:'Classic American IPA gateway. Caramel malt base with Cascade hops — citrus and pine. Balanced bitterness. Straightforward like a monkey\'s punch.' },
+  { name:'Glenlivet 12 Year', emoji:'🥃', notes:'Speyside single malt. Pineapple, pear, vanilla pod — fresh fruit and floral elegance. Smooth and silky. The world\'s best-selling single malt.' },
+  { name:'100 Years of Solitude Shochu', emoji:'🍶', notes:'Miyazaki Kuroki Honten barley shochu. Named after Marquez. Oak-aged with roasted barley, vanilla, and wood. Warm and profound.' },
+  { name:'Johnnie Walker Black Label', emoji:'🥃', notes:'Classic 12-year blended Scotch. 40+ whiskies — smoke, toffee, vanilla, spice layered together. The daily dram of whisky lovers worldwide.' },
+  { name:'Jameson', emoji:'🥃', notes:'Triple-distilled Irish blend whiskey. Silk-smooth, honey, toasted wood, subtle florals. No peat, all warmth. Perfect for beginners and veterans alike.' },
+  { name:'Rokudaime Yuri', emoji:'🍶', notes:'Kagoshima sweet potato shochu. Bold and intense, roasted sweet potato char, earthy depth. Warm powerful finish. Six generations of mastery.' },
+  { name:'Chichibu Hyakka Mead', emoji:'🍯', notes:'Saitama Chichibu Distillery limited release. Local wildflower honey fermented — sweet but not cloying, floral bouquet. Liquid spring garden in a bottle.' },
+];
+
 let shuffledWines = [];
 
 function shuffleWines() {
-  const arr = [...wines];
+  const arr = [...getWines()];
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -916,6 +962,8 @@ function shuffleWines() {
   return arr.slice(0, 4);
 }
 
+function getWines() { return document.documentElement.lang === 'en' ? winesEn : wines; }
+let shuffledWines = [];
 function renderWines(items) {
   const container = document.getElementById('wineCompact');
   if (!container) return;
@@ -953,10 +1001,18 @@ const techNotes = [
   { title:'React 组件样式管理：借鉴 React Native 的 StyleSheet 思维', summary:'将 React Native 的声明式样式管理引入 Web 项目——useStyles hook 实现与 RSC 兼容性探讨。', url:'/blog/blog-8.html', date:'2026-04-01', tags:['React','TypeScript','CSS'] },
 ];
 
+const techNotesEn = [
+  { title:'FastAPI + PostgreSQL Performance: Indexing & Connection Pooling', summary:'Deep dive into PostgreSQL performance tuning for FastAPI — index design, query optimization, and connection pool configuration from real project experience.', url:'/blog/blog-1.html', date:'2026-07-05', tags:['FastAPI','PostgreSQL','Perf'] },
+  { title:'Zero-Token-Overhead LLM Hallucination Detection', summary:'Lightweight hallucination detection using internal model representations — no extra API calls needed. 30% fewer hallucinations in code generation tasks.', url:'/blog/blog-5.html', date:'2026-05-12', tags:['LLM','AI','Python'] },
+  { title:'Production Docker Images: 1.2GB to 120MB', summary:'How a FastAPI Docker image went on a diet — multi-stage builds, Alpine selection, dependency pinning, and security scanning with Trivy.', url:'/blog/blog-4.html', date:'2026-05-27', tags:['Docker','Python','DevOps'] },
+  { title:'React Styling: Borrowing React Native\'s StyleSheet Mindset', summary:'Bringing React Native\'s declarative, type-safe StyleSheet.create to the web — a useStyles hook implementation with RSC compatibility.', url:'/blog/blog-8.html', date:'2026-04-01', tags:['React','TypeScript','CSS'] },
+];
+
 function renderTechNotes() {
   const container = document.getElementById('blogFeatured');
   if (!container) return;
-  container.innerHTML = techNotes.map((n, i) => `
+  const notes = document.documentElement.lang === 'en' ? techNotesEn : techNotes;
+  container.innerHTML = notes.map((n, i) => `
     <a class="technote-item" href="${n.url}" style="animation: fadeUp 0.4s ease ${i*0.08}s both;">
       <div class="technote-title">${n.title}</div>
       <div class="technote-summary">${n.summary}</div>
@@ -1008,6 +1064,44 @@ document.head.appendChild(style);
       ticking = true;
     }
   }, { passive: true });
+})();
+/* ============================================================
+   LANGUAGE SWITCH (ZH / EN)
+   ============================================================ */
+(function() {
+  const root = document.getElementById('rootHtml');
+  const btn = document.getElementById('langToggle');
+  let lang = localStorage.getItem('lang') || 'zh';
+
+  function applyLang(l) {
+    root.lang = l;
+    root.classList.toggle('en', l === 'en');
+    btn.textContent = l === 'en' ? 'EN' : '中';
+    btn.classList.toggle('en', l === 'en');
+    // Swap all data-en elements
+    document.querySelectorAll('[data-en]').forEach(el => {
+      if (l === 'en' && el.dataset.en) {
+        if (!el.dataset.zh) el.dataset.zh = el.textContent;
+        el.textContent = el.dataset.en;
+      } else if (el.dataset.zh) {
+        el.textContent = el.dataset.zh;
+      }
+    });
+    // Re-render dynamic content
+    if (typeof renderWines === 'function') {
+      shuffledWines = [];
+      renderWines();
+    }
+    if (typeof renderTechNotes === 'function') renderTechNotes();
+    localStorage.setItem('lang', l);
+  }
+
+  btn.addEventListener('click', () => {
+    lang = lang === 'zh' ? 'en' : 'zh';
+    applyLang(lang);
+  });
+
+  if (lang === 'en') applyLang('en');
 })();
 </script>
 </body>
