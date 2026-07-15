@@ -196,7 +196,26 @@ body::before {
 }
 .hero-tags {
   display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 16px;
 }
+
+.hero-resume {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.hero-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 8px 20px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600; text-decoration: none;
+  background: var(--blue); color: #fff;
+  transition: all 0.2s; font-family: inherit;
+}
+.hero-btn:hover { background: var(--blue-hover); transform: translateY(-1px); }
+.hero-btn-outline {
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.hero-btn-outline:hover { border-color: var(--blue); color: var(--blue); background: transparent; }
+.hero-btn:active { transform: scale(0.97); }
 
 /* ===== TAG PILLS ===== */
 .tag {
@@ -671,6 +690,10 @@ html.en .tag { font-size: 11px; }
           <span class="tag">电子竞技</span>
           <span class="tag"data-en="Docker">Docker</span>
           <span class="tag">n8n / Coze</span>
+        </div>
+        <div class="hero-resume">
+          <a href="/resume.pdf" target="_blank" class="hero-btn" data-en="View Résumé →">查看简历 →</a>
+          <a href="/resume.pdf" download class="hero-btn hero-btn-outline" data-en="Download ↓">下载简历 ↓</a>
         </div>
       </div>
     </div>
