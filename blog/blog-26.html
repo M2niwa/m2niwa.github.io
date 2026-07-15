@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes Agent 初体验：一个能记住你的终端 AI — M1NIWA</title>
+<meta name="description" content="从零安装 Hermes Agent 到完成第一个实战任务的完整记录。由 Nous Research 打造的自主 AI agent，不止聊天——它会记住你的偏好、创建技能、跨会话进化。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e4e6eb; line-height: 1.8; font-size: 17px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); } ::selection { background: rgba(59,130,246,0.3); color: #fff; }
+.container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+.blog-nav { display: flex; justify-content: space-between; align-items: center; padding: 28px 0 20px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 48px; }
+.blog-nav a { color: #9ca3af; text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.2s; } .blog-nav a:hover { color: #3b82f6; }
+.blog-nav .nav-blog-title { color: #e4e6eb; font-size: 15px; font-weight: 500; text-align: right; max-width: 60%; }
+.article-header { margin-bottom: 40px; } .article-title { font-size: 36px; font-weight: 700; line-height: 1.3; color: #e4e6eb; margin-bottom: 12px; } .article-date { font-size: 14px; color: #9ca3af; }
+.article-summary { margin-top: 20px; padding: 20px 24px; background: rgba(59,130,246,0.06); border-left: 3px solid #3b82f6; border-radius: 0 8px 8px 0; color: #b0b8c4; font-size: 16px; line-height: 1.7; }
+.article-body { margin-bottom: 60px; } .article-body p { margin-bottom: 22px; color: #d1d5db; }
+.article-body h2 { font-size: 24px; font-weight: 700; color: #e4e6eb; margin: 44px 0 16px; padding-left: 16px; border-left: 4px solid #3b82f6; line-height: 1.3; }
+.article-body h3 { font-size: 20px; font-weight: 600; color: #e4e6eb; margin: 32px 0 12px; } .article-body strong { color: #e4e6eb; font-weight: 600; }
+.article-body a { color: #3b82f6; text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.3); transition: border-color 0.2s; } .article-body a:hover { border-bottom-color: #3b82f6; }
+.article-body ul, .article-body ol { margin: 0 0 22px 24px; color: #d1d5db; } .article-body li { margin-bottom: 8px; }
+.article-body code { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 0.88em; background: rgba(0,0,0,0.35); padding: 2px 7px; border-radius: 4px; color: #fbbf24; }
+.article-body pre { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 20px 24px; overflow-x: auto; margin: 0 0 24px; line-height: 1.6; }
+.article-body pre code { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 14px; background: none; padding: 0; color: #e4e6eb; }
+.article-body blockquote { border-left: 3px solid #3b82f6; padding: 8px 16px; margin: 0 0 22px; color: #9ca3af; font-style: italic; }
+.blog-footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 0 48px; text-align: center; color: #6b7280; font-size: 14px; } .blog-footer a { color: #9ca3af; text-decoration: none; transition: color 0.2s; } .blog-footer a:hover { color: #3b82f6; }
+</style>
+</head>
+<body>
+<div class="container">
+<nav class="blog-nav">
+<a href="/index.html">← M1NIWA</a>
+<span class="nav-blog-title">Hermes 初体验</span>
+</nav>
+<header class="article-header">
+<h1 class="article-title">Hermes Agent 初体验：一个能记住你的终端 AI</h1>
+<div class="article-date">2026-05-18</div>
+<div class="article-summary">从零安装 Hermes Agent 到完成第一个实战任务的完整记录——由 Nous Research 打造的自主 AI agent，它不止聊天，还会记住你的偏好、创建技能、跨会话持续进化。</div>
+</header>
+<article class="article-body">
+
+<p>最近开始用 <a href="https://hermes-agent.nousresearch.com" target="_blank">Hermes Agent</a>，由 <strong>Nous Research</strong>（就是训练 Hermes 系列开源模型的那个团队）开发。它不是 LangChain 套壳，也不是 Copilot 那种嵌在 IDE 里的补全工具——它是一个<strong>完全自主的终端 AI agent</strong>，有记忆、会学习、能自己写 skill 并在后续对话中复用。</p>
+
+<p>这篇文章记录从零安装到跑通第一个实用任务的完整过程。</p>
+
+<h2>安装：比想象中简单</h2>
+
+<p>官方提供了一行命令安装：</p>
+
+<pre><code># Linux / macOS / WSL2
+curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+
+# Windows (PowerShell)
+iex (irm https://hermes-agent.nousresearch.com/install.ps1)</code></pre>
+
+<p>装完后用 <code>hermes setup --portal</code> 完成 OAuth 配置。这一步直接搞定三件事：接入模型提供商（默认 Nous Portal）、开通 Tool Gateway（web 搜索、图片生成、TTS、浏览器自动化四项工具）、生成 API key。全程大约 60 秒。</p>
+
+<p>Hermes 把配置分成两层：<code>config.yaml</code> 放普通参数（模型、工具开关），<code>secrets.yaml</code> 放敏感信息（API key、token）。这种分离比把所有东西堆在一起清爽得多——至少不会不小心把 token 提交到 GitHub 上了。</p>
+
+<h2>第一次对话：不只是聊天</h2>
+
+<p>启动后你会看到一个终端 TUI，顶部是模型名、可用工具和已加载的 skills。Hermes 的默认行为就和其他 AI 聊天不同——它<strong>默认拥有终端执行权限</strong>。你不是在「问它问题」，而是在「让它做事」。</p>
+
+<p>我试的第一个任务：</p>
+
+<pre><code>$ hermes
+> 帮我在当前目录初始化一个 Python 项目，用 FastAPI 写一个 hello world</code></pre>
+
+<p>Agent 的动作序列：</p>
+<ol>
+<li>读取当前目录结构（<code>ls</code>）</li>
+<li>创建 <code>main.py</code>（<code>write_file</code>）</li>
+<li>创建 <code>requirements.txt</code>（<code>write_file</code>）</li>
+<li>运行 <code>pip install -r requirements.txt</code>（<code>terminal</code>）</li>
+<li>启动 uvicorn 验证服务响应（<code>terminal</code>）</li>
+<li>完成后汇报结果</li>
+</ol>
+
+<p>没有「建议你这样写代码」的废话——直接读到、写到、跑到、验证完。这个执行闭环在传统聊天式 AI 里是做不到的。</p>
+
+<h2>最惊喜的功能：对话可以「恢复」</h2>
+
+<p>Hermes 有个细节设计让我印象很深——<strong>会话持久化</strong>。你在终端里输 <code>/new</code> 开启新对话，用 <code>/resume</code> 回到之前的会话。跟 AI 的对话不再是「一次性」的——它可以跨多次终端打开延续。</p>
+
+<p>这在处理复杂多步骤任务时特别有用。比如你下午写了一半的 API 接口，晚上回来 <code>/resume</code>，Agent 记得你做到哪了、文件路径、测试结果——不需要重新交代一遍上下文。</p>
+
+<p>文档里提到 Hermes 支持 <strong>Memory 系统</strong>，分两个文件：<code>MEMORY.md</code> 存环境和经验，<code>USER.md</code> 存用户身份和偏好。每次新会话启动时，这些内容会被注入系统 prompt。我在第一周还没深入用这个功能，但已经在每次交互中感受到 Agent 在「学习」我的工作习惯。</p>
+
+<h2>安全和隔离</h2>
+
+<p>Hermes 的终端能力是它的核心优势，但也是最大的安全考量。官方提供了几种隔离方案：</p>
+
+<ul>
+<li><strong>Docker 容器模式</strong>：Agent 在独立容器内执行命令，不影响宿主机</li>
+<li><strong>SSH 远程模式</strong>：Agent 通过 SSH 连接到远程服务器工作</li>
+<li><strong>命令审批模式</strong>：高危操作（rm、sudo）需要用户手动确认</li>
+</ul>
+
+<p>我用的是 Docker 隔离——配置一行 <code>backend: docker</code> 就够了。Agent 的所有文件操作、pip 安装、服务器启动都在独立容器里，即使出错也不会影响宿主机环境。</p>
+
+<p style="color:var(--text-tertiary);font-size:13px">--- 约 740 字</p>
+
+</article>
+<footer class="blog-footer">
+<p>© 2026 M1NIWA</p>
+<p style="margin-top: 8px;"><a href="/index.html">← 返回首页</a></p>
+</footer>
+</div>
+</body>
+</html>

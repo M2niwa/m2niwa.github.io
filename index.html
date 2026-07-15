@@ -690,6 +690,7 @@ html.en .tag { font-size: 11px; }
         <div class="skill-group-title" data-en="AI & Deep Learning">AI & 深度学习</div>
         <div class="skill-item"><span class="skill-name"data-en="CV / CV Models">CV / CV 模型</span><div class="skill-track"><div class="skill-fill" style="width:55%"></div></div></div>
         <div class="skill-item"><span class="skill-name"data-en="Agent Development">Agent 构建</span><div class="skill-track"><div class="skill-fill" style="width:35%"></div></div></div>
+        <div class="skill-item"><span class="skill-name"data-en="Hermes / Agent Orchestration">Hermes / Agent 编排</span><div class="skill-track"><div class="skill-fill" style="width:40%"></div></div></div>
         <div class="skill-item"><span class="skill-name"data-en="LLM & LoRA">LLM / LoRA</span><div class="skill-track"><div class="skill-fill" style="width:45%"></div></div></div>
         <div class="skill-item"><span class="skill-name"data-en="AI Tool Integration">AI 调用工具固化</span><div class="skill-track"><div class="skill-fill" style="width:55%"></div></div></div>
         <div class="skill-item"><span class="skill-name"data-en="n8n / Coze / ComfyUI">n8n / Coze / ComfyUI</span><div class="skill-track"><div class="skill-fill" style="width:35%"></div></div></div>
@@ -701,6 +702,7 @@ html.en .tag { font-size: 11px; }
         <div class="skill-item"><span class="skill-name"data-en="React">React</span><div class="skill-track"><div class="skill-fill" style="width:35%"></div></div></div>
         <div class="skill-item"><span class="skill-name"data-en="Flask / FastAPI">Flask / FastAPI</span><div class="skill-track"><div class="skill-fill" style="width:45%"></div></div></div>
         <div class="skill-item"><span class="skill-name">Docker</span><div class="skill-track"><div class="skill-fill" style="width:45%"></div></div></div>
+        <div class="skill-item"><span class="skill-name"data-en="Harness / CI-CD">Harness / CI-CD</span><div class="skill-track"><div class="skill-fill" style="width:40%"></div></div></div>
         <div class="skill-item"><span class="skill-name"data-en="C / C++ / Java">C / C++ / Java</span><div class="skill-track"><div class="skill-fill" style="width:35%"></div></div></div>
         <div class="skill-item"><span class="skill-name"data-en="ArkTS">ArkTS</span><div class="skill-track"><div class="skill-fill" style="width:25%"></div></div></div>
         <div class="skill-group-title" style="margin-top:28px" data-en="Tools & Collab">工具 & 协作</div>
@@ -725,7 +727,7 @@ html.en .tag { font-size: 11px; }
       <!-- JS renders 4 featured posts -->
     </div>
     <div class="blog-more-wrap">
-      <a href="/blog/index.html" class="blog-more-btn" data-en="View all 25 posts →">查看全部 25 篇文章 →</a>
+      <a href="/blog/index.html" class="blog-more-btn" data-en="View all 30 posts →">查看全部 30 篇文章 →</a>
     </div>
   </div>
 </section>
@@ -1028,16 +1030,16 @@ renderWines();
 /* ===== TECH NOTES ===== */
 const techNotes = [
   { title:'FastAPI + PostgreSQL 性能调优：索引策略与连接池优化', summary:'从索引设计、查询优化和连接池配置三个维度，拆解 FastAPI 项目中 PostgreSQL 性能调优的实战经验。', url:'/blog/blog-1.html', date:'2026-07-05', tags:['FastAPI','PostgreSQL','性能'] },
-  { title:'LLM 幻觉检测：零额外 token 开销的新思路', summary:'基于模型内部表征的轻量级幻觉检测方法，无需额外 API 调用，代码生成任务减少 30% 幻觉。', url:'/blog/blog-5.html', date:'2026-05-12', tags:['LLM','AI','Python'] },
+  { title:'Hermes 的自我进化：Skills 和 Memory 如何让 AI 越用越强', summary:'Skills 让工作流可复用，Memory 让偏好跨会话持久化——拆解 Hermes Agent「封闭学习循环」的工作原理和实战用法。', url:'/blog/blog-28.html', date:'2026-06-16', tags:['Hermes','Agent','自动化'] },
   { title:'Python 生产级 Docker 镜像：从 1.2GB 到 120MB', summary:'一个 FastAPI 应用的 Docker 镜像瘦身历程——多阶段构建、Alpine 选型、依赖锁定与安全扫描。', url:'/blog/blog-4.html', date:'2026-05-27', tags:['Docker','Python','DevOps'] },
-  { title:'React 组件样式管理：借鉴 React Native 的 StyleSheet 思维', summary:'将 React Native 的声明式样式管理引入 Web 项目——useStyles hook 实现与 RSC 兼容性探讨。', url:'/blog/blog-8.html', date:'2026-04-01', tags:['React','TypeScript','CSS'] },
+  { title:'Harness Feature Flags + 灰度发布：降低部署风险的工程实践', summary:'Feature Flags 不只是开关——结合 Harness CD 的 Canary 部署策略，将部署事故从每月 3 次降到零的完整实践。', url:'/blog/blog-30.html', date:'2026-07-12', tags:['Harness','CI-CD','DevOps'] },
 ];
 
 const techNotesEn = [
   { title:'FastAPI + PostgreSQL Performance: Indexing & Connection Pooling', summary:'Deep dive into PostgreSQL performance tuning for FastAPI — index design, query optimization, and connection pool configuration from real project experience.', url:'/blog/blog-1.html', date:'2026-07-05', tags:['FastAPI','PostgreSQL','Perf'] },
-  { title:'Zero-Token-Overhead LLM Hallucination Detection', summary:'Lightweight hallucination detection using internal model representations — no extra API calls needed. 30% fewer hallucinations in code generation tasks.', url:'/blog/blog-5.html', date:'2026-05-12', tags:['LLM','AI','Python'] },
+  { title:'Hermes Self-Evolving Agent: Skills & Memory Deep Dive', summary:'How Skills and Memory form Hermes Agent\'s closed learning loop — reusable workflows, persistent preferences, and an agent that improves with every session.', url:'/blog/blog-28.html', date:'2026-06-16', tags:['Hermes','Agent','Automation'] },
   { title:'Production Docker Images: 1.2GB to 120MB', summary:'How a FastAPI Docker image went on a diet — multi-stage builds, Alpine selection, dependency pinning, and security scanning with Trivy.', url:'/blog/blog-4.html', date:'2026-05-27', tags:['Docker','Python','DevOps'] },
-  { title:'React Styling: Borrowing React Native\'s StyleSheet Mindset', summary:'Bringing React Native\'s declarative, type-safe StyleSheet.create to the web — a useStyles hook implementation with RSC compatibility.', url:'/blog/blog-8.html', date:'2026-04-01', tags:['React','TypeScript','CSS'] },
+  { title:'Harness Feature Flags + Canary: Risk-Free Deployments in Practice', summary:'Feature Flags aren\'t just toggles — combined with Harness CD Canary strategy, deployment incidents dropped from 3/month to zero.', url:'/blog/blog-30.html', date:'2026-07-12', tags:['Harness','CI-CD','DevOps'] },
 ];
 
 function renderTechNotes() {

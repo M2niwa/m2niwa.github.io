@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hermes 的自我进化：Skills 和 Memory 如何让 AI 越用越强 — M1NIWA</title>
+<meta name="description" content="Hermes Agent 的核心差异在于它的「封闭学习循环」——Skills 让工作流可复用，Memory 让偏好跨会话持久化。深入拆解这两个系统的工作原理和实战用法。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e4e6eb; line-height: 1.8; font-size: 17px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); } ::selection { background: rgba(59,130,246,0.3); color: #fff; }
+.container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+.blog-nav { display: flex; justify-content: space-between; align-items: center; padding: 28px 0 20px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 48px; }
+.blog-nav a { color: #9ca3af; text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.2s; } .blog-nav a:hover { color: #3b82f6; }
+.blog-nav .nav-blog-title { color: #e4e6eb; font-size: 15px; font-weight: 500; text-align: right; max-width: 60%; }
+.article-header { margin-bottom: 40px; } .article-title { font-size: 36px; font-weight: 700; line-height: 1.3; color: #e4e6eb; margin-bottom: 12px; } .article-date { font-size: 14px; color: #9ca3af; }
+.article-summary { margin-top: 20px; padding: 20px 24px; background: rgba(59,130,246,0.06); border-left: 3px solid #3b82f6; border-radius: 0 8px 8px 0; color: #b0b8c4; font-size: 16px; line-height: 1.7; }
+.article-body { margin-bottom: 60px; } .article-body p { margin-bottom: 22px; color: #d1d5db; }
+.article-body h2 { font-size: 24px; font-weight: 700; color: #e4e6eb; margin: 44px 0 16px; padding-left: 16px; border-left: 4px solid #3b82f6; line-height: 1.3; }
+.article-body h3 { font-size: 20px; font-weight: 600; color: #e4e6eb; margin: 32px 0 12px; } .article-body strong { color: #e4e6eb; font-weight: 600; }
+.article-body a { color: #3b82f6; text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.3); transition: border-color 0.2s; } .article-body a:hover { border-bottom-color: #3b82f6; }
+.article-body ul, .article-body ol { margin: 0 0 22px 24px; color: #d1d5db; } .article-body li { margin-bottom: 8px; }
+.article-body code { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 0.88em; background: rgba(0,0,0,0.35); padding: 2px 7px; border-radius: 4px; color: #fbbf24; }
+.article-body pre { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 20px 24px; overflow-x: auto; margin: 0 0 24px; line-height: 1.6; }
+.article-body pre code { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 14px; background: none; padding: 0; color: #e4e6eb; }
+.article-body blockquote { border-left: 3px solid #3b82f6; padding: 8px 16px; margin: 0 0 22px; color: #9ca3af; font-style: italic; }
+.blog-footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 0 48px; text-align: center; color: #6b7280; font-size: 14px; } .blog-footer a { color: #9ca3af; text-decoration: none; transition: color 0.2s; } .blog-footer a:hover { color: #3b82f6; }
+</style>
+</head>
+<body>
+<div class="container">
+<nav class="blog-nav">
+<a href="/index.html">← M1NIWA</a>
+<span class="nav-blog-title">Skills & Memory</span>
+</nav>
+<header class="article-header">
+<h1 class="article-title">Hermes 的自我进化：Skills 和 Memory 如何让 AI 越用越强</h1>
+<div class="article-date">2026-06-16</div>
+<div class="article-summary">Hermes Agent 的核心差异在于它的「封闭学习循环」——Skills 让工作流可复用，Memory 让偏好跨会话持久化。深入拆解这两个系统的工作原理和实战用法。</div>
+</header>
+<article class="article-body">
+
+<p><a href="https://hermes-agent.nousresearch.com/blog/blog-26.html">上次</a>讲了 Hermes Agent 的安装和基础使用。用了几个星期后，真正让我觉得它和其他 AI 工具有本质区别的，是它的<strong>学习和进化能力</strong>——Hermes 不是每次对话都从零开始的失忆 chatbot，而是一个会积累经验、改进工作流、越用越顺手的 agent。这背后依赖两个核心系统：<strong>Skills</strong> 和 <strong>Memory</strong>。</p>
+
+<h2>Skills：Agent 的「肌肉记忆」</h2>
+
+<p>在 Hermes 的设计里，<strong>Skill 是一个可复用的知识包</strong>——包含完成某类任务所需的所有信息：步骤、命令、常见陷阱、验证方法。每次 Hermes 成功完成一个复杂任务后，它可以自动创建或更新一个 Skill。下次遇到类似任务时，Skill 会被加载到上下文中，Agent 不需要重新「思考」该怎么做。</p>
+
+<p>Skills 使用高效的 token 加载模式：<strong>只有描述（description）在会话启动时注入 prompt，完整内容在 Agent 判断需要时才加载</strong>。这避免了每次都把大段技能文档塞进上下文窗口。</p>
+
+<p>Skill 的另一个设计巧思是它的 <strong>跨平台分发能力</strong>——通过 <a href="https://agentskills.io" target="_blank">agentskills.io</a> 或 GitHub 仓库，你可以安装社区贡献的 Skill。社区已经有覆盖各种场景的 skill pack：天气数据抓取、邮件总结、Nextcloud 部署、甚至用 Hermes 给孩子讲睡前故事。</p>
+
+<p>我最常用的 Skill 是自己迭代出来的 <code>personal-website</code>——里面记录了网站的项目路径、CSS 变量约定、常见 JS 陷阱（比如 <code>let</code> 重复声明导致 SyntaxError）、部署流程。每次修改网站时，Agent 自动加载这些上下文，不再犯已经踩过的坑。</p>
+
+<h2>Memory：跨越会话的持久记忆</h2>
+
+<p>如果说 Skills 是「怎么做」，Memory 就是「关于你和你的环境的一切」。Hermes 的 Memory 系统维护两个文件：</p>
+
+<ul>
+<li><strong>MEMORY.md</strong>：项目路径、工具偏好、环境配置、经验教训</li>
+<li><strong>USER.md</strong>：用户名、联系方式、GitHub 账户、语言偏好</li>
+</ul>
+
+<p>每次新会话启动时，这两个文件的内容会被注入系统 prompt 作为固定区块。Memory 有严格的字符限制（<code>MEMORY.md</code> 约 2200 字符，<code>USER.md</code> 约 1375 字符），防止系统 prompt 膨胀。</p>
+
+<p>一个容易被忽视但很重要的设计：Hermes 不是被动记录一切，而是<strong>有选择地保存</strong>——它会在以下时机自动触发记忆写入：</p>
+<ul>
+<li>用户表达了明确的偏好或纠正了 Agent 的行为</li>
+<li>发现了新的环境细节（新项目路径、工具版本）</li>
+<li>完成了复杂任务并提炼出可复用的经验</li>
+</ul>
+
+<p>还有一个安全细节：Memory 写入前会经过注入扫描——检测 prompt injection、凭证泄露、不可见 Unicode 字符等威胁模式。因为 Memory 内容会被注入系统 prompt，这个防护是必要的。</p>
+
+<h2>封闭学习循环的实际效果</h2>
+
+<p>Skills + Memory 的组合形成了一个 <strong>封闭学习循环</strong>：每次交互 → Agent 学习新知识 → 保存到 Memory 或创建/更新 Skill → 下次交互时自动加载 → 表现更好。</p>
+
+<p>实际体验上，用 Hermes 两周后能明显感受到变化：它不再需要我重复「我的项目在 D 盘」「用 Python 3.13」「网站端口是 8766」——这些信息已经存在 Memory 里。更重要的是，当它犯了一次错误后，会把修正方案写入对应的 Skill，保证同样的错误不会出现第二次。</p>
+
+<p>这就是 Hermes 和 ChatGPT / Copilot 最本质的区别：<strong>它不是每次从零开始的对话工具，而是一个持续进化的开发伙伴</strong>。</p>
+
+<p style="color:var(--text-tertiary);font-size:13px">--- 约 780 字</p>
+
+</article>
+<footer class="blog-footer">
+<p>© 2026 M1NIWA</p>
+<p style="margin-top: 8px;"><a href="/index.html">← 返回首页</a></p>
+</footer>
+</div>
+</body>
+</html>

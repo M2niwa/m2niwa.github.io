@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness 部署策略选型：Rolling、Blue-Green 还是 Canary？ — M1NIWA</title>
+<meta name="description" content="Harness 支持多种部署策略，但该选哪个？深入对比 Basic、Rolling、Blue-Green 和 Canary 四种策略的原理、适用场景和风险差异，附实战选型决策树。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #0f1117; color: #e4e6eb; line-height: 1.8; font-size: 17px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; } ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); } ::selection { background: rgba(59,130,246,0.3); color: #fff; }
+.container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+.blog-nav { display: flex; justify-content: space-between; align-items: center; padding: 28px 0 20px; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 48px; }
+.blog-nav a { color: #9ca3af; text-decoration: none; font-size: 15px; font-weight: 500; transition: color 0.2s; } .blog-nav a:hover { color: #3b82f6; }
+.blog-nav .nav-blog-title { color: #e4e6eb; font-size: 15px; font-weight: 500; text-align: right; max-width: 60%; }
+.article-header { margin-bottom: 40px; } .article-title { font-size: 36px; font-weight: 700; line-height: 1.3; color: #e4e6eb; margin-bottom: 12px; } .article-date { font-size: 14px; color: #9ca3af; }
+.article-summary { margin-top: 20px; padding: 20px 24px; background: rgba(59,130,246,0.06); border-left: 3px solid #3b82f6; border-radius: 0 8px 8px 0; color: #b0b8c4; font-size: 16px; line-height: 1.7; }
+.article-body { margin-bottom: 60px; } .article-body p { margin-bottom: 22px; color: #d1d5db; }
+.article-body h2 { font-size: 24px; font-weight: 700; color: #e4e6eb; margin: 44px 0 16px; padding-left: 16px; border-left: 4px solid #3b82f6; line-height: 1.3; }
+.article-body h3 { font-size: 20px; font-weight: 600; color: #e4e6eb; margin: 32px 0 12px; } .article-body strong { color: #e4e6eb; font-weight: 600; }
+.article-body a { color: #3b82f6; text-decoration: none; border-bottom: 1px solid rgba(59,130,246,0.3); transition: border-color 0.2s; } .article-body a:hover { border-bottom-color: #3b82f6; }
+.article-body ul, .article-body ol { margin: 0 0 22px 24px; color: #d1d5db; } .article-body li { margin-bottom: 8px; }
+.article-body code { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 0.88em; background: rgba(0,0,0,0.35); padding: 2px 7px; border-radius: 4px; color: #fbbf24; }
+.article-body pre { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 20px 24px; overflow-x: auto; margin: 0 0 24px; line-height: 1.6; }
+.article-body pre code { font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace; font-size: 14px; background: none; padding: 0; color: #e4e6eb; }
+.article-body blockquote { border-left: 3px solid #3b82f6; padding: 8px 16px; margin: 0 0 22px; color: #9ca3af; font-style: italic; }
+.blog-footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 0 48px; text-align: center; color: #6b7280; font-size: 14px; } .blog-footer a { color: #9ca3af; text-decoration: none; transition: color 0.2s; } .blog-footer a:hover { color: #3b82f6; }
+</style>
+</head>
+<body>
+<div class="container">
+<nav class="blog-nav">
+<a href="/index.html">← M1NIWA</a>
+<span class="nav-blog-title">部署策略选型</span>
+</nav>
+<header class="article-header">
+<h1 class="article-title">Harness 部署策略选型：Rolling、Blue-Green 还是 Canary？</h1>
+<div class="article-date">2026-06-29</div>
+<div class="article-summary">Harness 支持多种部署策略，但该选哪个？深入对比 Basic、Rolling、Blue-Green 和 Canary 四种策略的原理、适用场景和风险差异，附实战选型决策树。</div>
+</header>
+<article class="article-body">
+
+<p><a href="/blog/blog-27.html">上篇</a>讲了怎么在 Harness 中搭第一条 Pipeline——但 Pipeline 跑起来只是第一步。真正决定部署质量的是<strong>你选的部署策略</strong>。用错了策略，再好的 Pipeline 配置也可能在上线时翻车。</p>
+
+<p>Harness 的部署策略定义了新版本如何替换旧版本。它原生支持四种策略：Basic、Rolling、Blue-Green 和 Canary。每种有不同的风险模型和适用场景。</p>
+
+<h2>Basic：全量替换，简单但不安全</h2>
+
+<p>Basic 部署是最直接的方式——<strong>所有节点（pods、实例等）在同一时间被新版本替换</strong>。没有渐进过程，没有验证窗口，一刀切。</p>
+
+<p>优点：配置最简单，部署速度最快。缺点也很明显：如果新版本有 bug，<strong>所有用户同时受影响</strong>，而且回滚需要完整重新部署旧版本——这个过程中服务可能完全不可用。</p>
+
+<p>Harness 官方文档明确说 Basic 部署「不适用于生产环境」。它的定位是给你做实验和快速原型用的。如果你只是在开发环境里玩玩，Basic 够用；但只要涉及真实用户，往上再看。</p>
+
+<h2>Rolling：逐个替换，零 downtime 但慢</h2>
+
+<p>Rolling 部署的策略是：<strong>所有节点被逐个（或按批次）替换</strong>。每替换一个节点后等待它健康检查通过，再替换下一个。</p>
+
+<p>好处是零 downtime——始终有节点在服务中。坏处是部署窗口长（节点越多越慢），而且<strong>新旧版本会短暂共存</strong>——这对 API 向后兼容性有要求。如果你的新版本改了数据库 schema 或不兼容旧 API，Rolling 部署期间会出现奇怪的问题。</p>
+
+<p>Rolling 在 Harness 中常作为 Canary 部署的前置阶段——先在 QA 环境做 Rolling 部署验证，通过后再在 Production 做 Canary。</p>
+
+<h2>Blue-Green：即时切换，但成本翻倍</h2>
+
+<p>Blue-Green 的核心思想是维护<strong>两套完全相同的环境</strong>——Blue（当前生产版本）和 Green（新版本）。QA 在 Green 环境完成验证后，通过负载均衡器<strong>一次性将全部流量从 Blue 切到 Green</strong>。</p>
+
+<p>优势是切换几乎是瞬时的，回滚也极其简单——把流量切回 Blue 就行。代价是基础设施成本翻倍——你需要两套完整的生产环境。对于资源敏感的小团队或个人项目，这个成本可能难以接受。</p>
+
+<p>有些厂商把 Blue-Green 叫 Red-Black 部署，本质是一样的。</p>
+
+<h2>Canary：渐进式验证，最安全但最复杂</h2>
+
+<p>Canary 部署是<strong>目前最推荐的生产部署策略</strong>——新版本先部署到一小部分实例（如 5%），观察一段时间后逐步扩大比例：10% → 25% → 50% → 100%。每个阶段都有验证门禁——如果监控指标异常，自动停止并回滚。</p>
+
+<p>Canary 的核心优势是<strong>把爆炸半径控制在最小</strong>。即使新版本有严重 bug，最坏情况也只影响 5% 的用户，而不是全部。Harness 的 Canary 实现还有一个细节：在 Kubernetes 上，Canary 阶段会使用额外实例而非替换已有实例，保证生产版本不受影响。</p>
+
+<p>代价是 Pipeline 配置更复杂，部署时间更长（需要多个验证阶段）。但对比一次全量部署翻车带来的损失，这点复杂度是值得的投资。</p>
+
+<h2>怎么选？一个简易决策树</h2>
+
+<ul>
+<li>你在开发/测试环境 → <strong>Basic</strong> 或 <strong>Rolling</strong></li>
+<li>生产环境，但团队小、资源有限 → <strong>Rolling</strong></li>
+<li>生产环境，能接受双倍基础设施成本 → <strong>Blue-Green</strong></li>
+<li>生产环境，追求最小风险 → <strong>Canary</strong></li>
+</ul>
+
+<p>我个人网站的部署选择了 Rolling——因为只有一台服务器，Blue-Green 成本太高，Canary 又太复杂。但对于团队协作的商业项目，Canary 几乎是最优解。</p>
+
+<p style="color:var(--text-tertiary);font-size:13px">--- 约 770 字</p>
+
+</article>
+<footer class="blog-footer">
+<p>© 2026 M1NIWA</p>
+<p style="margin-top: 8px;"><a href="/index.html">← 返回首页</a></p>
+</footer>
+</div>
+</body>
+</html>
