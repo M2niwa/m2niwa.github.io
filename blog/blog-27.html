@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>从手写脚本到 Harness CD：第一条 Pipeline 的搭建实录 — M1NIWA</title>
-<meta name="description" content="把个人项目的部署从手写 bash 脚本迁移到 Harness CD 的全过程——Pipeline 的 Stage/Step 层级结构、Webhook 触发器、Delegate 代理和第一次自动部署的踩坑记录。">
+<title>理解Transformer：手推一遍Self-Attention — M1NIWA</title>
+<meta name="description" content="从 RNN 的局限出发，手推 Self-Attention 公式：QKV 三个矩阵的物理含义、缩放因子 √dk 为什么重要、Multi-Head 是切分维度而非并行计算、Positional Encoding 的正余弦设计原理。">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,95 +32,52 @@ body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; ba
 <div class="container">
 <nav class="blog-nav">
 <a href="/index.html">← M1NIWA</a>
-<span class="nav-blog-title">Harness CD 实战</span>
+<span class="nav-blog-title">Transformer 推导</span>
 </nav>
 <header class="article-header">
-<h1 class="article-title">从手写脚本到 Harness CD：第一条 Pipeline 的搭建实录</h1>
-<div class="article-date">2026-06-02</div>
-<div class="article-summary">把个人项目的部署从手写 bash 脚本迁移到 Harness CD 的全过程——Pipeline 的 Stage/Step 层级结构、Webhook 触发器配置、Delegate 代理部署，以及第一次自动部署中踩的坑。</div>
+<h1 class="article-title">理解Transformer：手推一遍Self-Attention</h1>
+<div class="article-date">2026-02-20</div>
+<div class="article-summary">看了三遍原论文都没完全懂 Self-Attention，直到自己拿纸笔手推了一遍。这篇笔记记录了推导过程中真正帮我理解的那些关键点。</div>
 </header>
 <article class="article-body">
 
-<p>在接触 <a href="https://harness.io" target="_blank">Harness</a> 之前，我的部署流程就是 SSH 进服务器 → <code>git pull</code> → <code>docker-compose up -d --build</code> → 祈祷。这种「手工部署」用在小项目上还能忍，但一旦需要管理多个环境（开发/测试/生产），手动操作的出错概率和心智负担就直线上升。</p>
+<p>第一次读 "Attention Is All You Need" 的时候，我只记住了 Q、K、V 三个字母。过了一周连公式都默写不出来。后来下定决心，关了所有参考资料，拿纸笔从 definition 开始手推——这次终于「通」了。</p>
 
-<p>Harness 是一个完整的软件交付平台，最初以 CD（Continuous Delivery）闻名，现在扩展到 CI、Feature Flags、云成本管理、安全测试等多个模块。这篇文章聚焦在最核心的 CD 部分——怎么从零搭第一条能自动部署的 Pipeline。</p>
+<h2>从 RNN 的局限说起</h2>
 
-<h2>Harness CD 的核心抽象：Pipeline → Stage → Step</h2>
+<p>RNN 处理序列的核心问题是<strong>无法并行</strong>——第 t 个 token 的计算依赖第 t-1 个 token 的 hidden state。而且长序列的梯度传播会指数衰减（所谓的「长期依赖」问题）。LSTM 和 GRU 加了门控机制缓解了梯度消失，但并行的瓶颈依然在。</p>
 
-<p>理解 Harness 最关键的是掌握它的层级结构：</p>
+<p>Self-Attention 换个思路：<strong>不再按顺序处理，而是让每个 token 直接「看到」序列中所有其他 token</strong>。这句话听起来简单，但实现起来需要一套精巧的机制。</p>
 
-<ul>
-<li><strong>Pipeline</strong>：一次完整的交付流程。一个 Pipeline 可以包含多个 Stage。</li>
-<li><strong>Stage</strong>：按环境或阶段划分的执行单元。比如 Dev Stage → Staging Stage → Production Stage。</li>
-<li><strong>Step</strong>：最小操作单元——执行脚本、发送通知、等待审批等。</li>
-</ul>
+<h2>Q、K、V 到底在做什么</h2>
 
-<p>这种三层抽象和你熟悉的 CI/CD 工具（GitHub Actions、GitLab CI）的理念类似，但 Harness 把 Stage 的概念提升到了一等公民——每个 Stage 可以独立配置部署策略、审批流程和失败处理。</p>
-
-<h2>配置第一条 Pipeline</h2>
-
-<p>我用 Harness 的 YAML 编辑器直接写配置（Harness 也提供可视化编辑器，但源码控制场景下 YAML 更方便）：</p>
-
-<pre><code>pipeline:
-  name: personal-website-deploy
-  identifier: personal_website_deploy
-  projectIdentifier: personal_projects
-  orgIdentifier: default
-  stages:
-    - stage:
-        name: Deploy
-        type: Deployment
-        spec:
-          serviceConfig:
-            serviceRef: website
-          execution:
-            steps:
-              - step:
-                  type: ShellScript
-                  name: Pull and Build
-                  spec:
-                    shell: Bash
-                    onDelegate: true
-                    source:
-                      type: Inline
-                      spec:
-                        script: |
-                          git clone https://github.com/M2niwa/m2niwa.github.io
-                          # build commands</code></pre>
-
-<p>这里有个关键参数：<code>onDelegate: true</code>。这意味着脚本在你自己的 <strong>Harness Delegate</strong> 上执行，而不是在 Harness 云端沙箱。对于需要访问私有仓库或内网服务器的场景，这几乎是必须的。</p>
-
-<h2>Delegate：连接 Harness 和你服务器的桥梁</h2>
-
-<p>Delegate 是 Harness 架构中最重要的组件——它是一个运行在你基础设施（Kubernetes、Docker、VM）上的轻量级代理，负责：</p>
+<p>我把 Self-Attention 理解成一个<strong>软寻址</strong>过程。每个 token 的 embedding 向量通过三个不同的线性变换矩阵 W<sup>Q</sup>、W<sup>K</sup>、W<sup>V</sup> 投影成三个角色：</p>
 
 <ul>
-<li>从 Harness 平台拉取 Pipeline 任务</li>
-<li>在你的环境中执行 Shell 脚本、kubectl 命令、Terraform 等</li>
-<li>将执行日志和状态回传到 Harness 平台</li>
+<li><strong>Query（查询）</strong>：「我现在关心什么？」——当前 token 想要找什么信息。</li>
+<li><strong>Key（键）</strong>：「我能提供什么？」——序列中每个 token 能提供什么信息。</li>
+<li><strong>Value（值）</strong>：「实际内容是什么？」——序列中每个 token 的实际表示。</li>
 </ul>
 
-<p>我用了 Docker 部署 Delegate，只需一个 <code>docker run</code> 命令就能启动。但这里有一个易错点：<strong>Delegate 不会自动更新</strong>。如果 Harness 平台升级了新功能，旧版 Delegate 可能不支持新的 Step 类型，导致 Pipeline 执行报错。解决方案是定期 pull 最新镜像或使用 Kubernetes 的自动更新策略。</p>
+<p>计算流程：<code>Attention(Q,K,V) = softmax(QKᵀ / √d<sub>k</sub>) · V</code>。Q 和 K 做点积得到「相关性分数」，softmax 归一化成权重，再用权重去加权求和 V。本质上就是「根据 query 和 key 的匹配程度，从各个 value 中抽取信息」。</p>
 
-<h2>接入 GitHub Webhook 触发器</h2>
+<h2>√d<sub>k</sub>：一个小小的缩放因子，影响巨大</h2>
 
-<p>配好 Pipeline 后，下一步是让它「自动运行」——每次推送代码到主分支时触发部署。Harness 原生支持 Webhook 触发：</p>
+<p>手推的时候我最疑惑的就是分母那个 √d<sub>k</sub>。为什么不是 d<sub>k</sub>？为什么不是 1？</p>
 
-<ol>
-<li>在 Harness 中创建 Trigger，选择 Webhook 类型</li>
-<li>复制生成的 Webhook URL 和 Secret</li>
-<li>在 GitHub 仓库的 Settings → Webhooks 中填入</li>
-</ol>
+<p>假设 Q 和 K 的每个分量独立同分布，均值为 0，方差为 1。点积 QKᵀ 的方差是 d<sub>k</sub>——d<sub>k</sub> 越大，点积的数值范围越大。大的点积值进入 softmax 后会挤压到梯度极小的饱和区，导致训练不动。除以 √d<sub>k</sub> 把方差拉回 1，让 softmax 的输入保持在梯度合理的范围内。<strong>不是一个 tricks，而是数学必然</strong>。</p>
 
-<p>配置完成后，整个部署链路变成：</p>
+<h2>Multi-Head：切分维度，不是并行计算</h2>
 
-<pre><code>git push → GitHub Webhook → Harness Trigger → Pipeline 执行 → 部署完成</code></pre>
+<p>我之前一直以为 Multi-Head 是为了并行加速——八个头同时算。错。Multi-Head 的核心是<strong>把 d_model 切分成 h 份，每份独立做 Attention</strong>。比如 d_model=512，8 个头，每个头只在 64 维子空间里做 Attention。</p>
 
-<p>从 push 到线上生效大约 2-3 分钟。第一次看到这个流程跑通的感觉确实不错——<strong>部署不再是需要我亲自盯着的事</strong>。</p>
+<p>这样做的好处是让不同头关注不同位置的信息——一个头可能专注邻近 token 的语法关系，另一个头可能关注远距离的语义关联。concat 后再投影回原维度，信息就融合了。推荐阅读 Jay Alammar 的 The Illustrated Transformer，图解非常直观。</p>
 
-<p>不过 Harness 的入门还是有一些上手成本。YAML 配置的选项非常多，文档虽然全面但初次阅读时容易迷失。建议从官方 Tutorial 开始，跟着一步步操作，而不是从零看文档。</p>
+<h2>Positional Encoding：为什么用正余弦</h2>
 
-<p style="color:var(--text-tertiary);font-size:13px">--- 约 730 字</p>
+<p>Self-Attention 本身<strong>对位置无感知</strong>——"我吃苹果"和"苹果吃我"在它看来是一样的。所以必须在输入端加上位置信息。论文用了正弦和余弦函数的组合——不同频率对应不同位置尺度。我自己推了一下：相邻位置的编码相似，远处位置差异大；而且 sin/cos 能外推到训练时没见过的序列长度。这个设计实在太优雅了。</p>
+
+<p style="color:var(--text-tertiary);font-size:13px">--- 约 720 字</p>
 
 </article>
 <footer class="blog-footer">

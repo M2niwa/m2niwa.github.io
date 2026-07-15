@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hermes Agent 初体验：一个能记住你的终端 AI — M1NIWA</title>
-<meta name="description" content="从零安装 Hermes Agent 到完成第一个实战任务的完整记录。由 Nous Research 打造的自主 AI agent，不止聊天——它会记住你的偏好、创建技能、跨会话进化。">
+<title>从零学PyTorch：第一周的五个坑 — M1NIWA</title>
+<meta name="description" content="大二暑假开始自学 PyTorch，第一周踩的五个典型坑：tensor/ numpy 互转的 device 问题、DataLoader 在 Windows 下的 num_workers 坑、autograd 的 retain_graph、model.train/eval 忘记切换、CUDA OOM 排查思路。">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -32,75 +32,40 @@ body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; ba
 <div class="container">
 <nav class="blog-nav">
 <a href="/index.html">← M1NIWA</a>
-<span class="nav-blog-title">Hermes 初体验</span>
+<span class="nav-blog-title">PyTorch 踩坑记</span>
 </nav>
 <header class="article-header">
-<h1 class="article-title">Hermes Agent 初体验：一个能记住你的终端 AI</h1>
-<div class="article-date">2026-05-18</div>
-<div class="article-summary">从零安装 Hermes Agent 到完成第一个实战任务的完整记录——由 Nous Research 打造的自主 AI agent，它不止聊天，还会记住你的偏好、创建技能、跨会话持续进化。</div>
+<h1 class="article-title">从零学PyTorch：第一周的五个坑</h1>
+<div class="article-date">2026-03-10</div>
+<div class="article-summary">大二暑假开始自学 PyTorch，以为照着官方 Tutorial 跑一遍就会了——结果第一周几乎天天在 debug。记录五个最典型的新手坑。</div>
 </header>
 <article class="article-body">
 
-<p>最近开始用 <a href="https://hermes-agent.nousresearch.com" target="_blank">Hermes Agent</a>，由 <strong>Nous Research</strong>（就是训练 Hermes 系列开源模型的那个团队）开发。它不是 LangChain 套壳，也不是 Copilot 那种嵌在 IDE 里的补全工具——它是一个<strong>完全自主的终端 AI agent</strong>，有记忆、会学习、能自己写 skill 并在后续对话中复用。</p>
+<p>我第一次装好 PyTorch 的时候信心满满——毕竟照着官网 <code>pip install torch</code> 一行命令就搞定了。但真正开始写训练代码之后才发现，会装和会用之间差了整整一周的踩坑。</p>
 
-<p>这篇文章记录从零安装到跑通第一个实用任务的完整过程。</p>
+<h2>坑一：Tensor 和 NumPy 互转的 device 地狱</h2>
 
-<h2>安装：比想象中简单</h2>
+<p>这是我第一个报错，也是最困惑的一个。代码逻辑很简单：从 NumPy 加载数据，转成 Tensor，送进 GPU 训练。结果一到 <code>torch.from_numpy()</code> 就报 <code>TypeError: expected CPU tensor</code>。查了半天才明白：<strong>NumPy 数组永远在 CPU 上</strong>，转成 Tensor 后默认也在 CPU。如果你之前把模型 <code>.to('cuda')</code> 了，直接拿 CPU tensor 去算就会报 device mismatch。正确做法是 <code>torch.from_numpy(arr).to(device)</code>，或者干脆在 DataLoader 的 <code>collate_fn</code> 里统一处理——我后来踩了三四次才养成这个习惯。</p>
 
-<p>官方提供了一行命令安装：</p>
+<h2>坑二：Windows 下 DataLoader 的 num_workers</h2>
 
-<pre><code># Linux / macOS / WSL2
-curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash
+<p>Tutorial 里写着 <code>num_workers=4</code> 能加速数据加载，我就照抄了。结果 Windows 上报了一串 <code>RuntimeError: DataLoader worker exited unexpectedly</code>，完全看不懂。搜了 GitHub Issues 才知道：<strong>Windows 没有 fork()</strong>，多进程数据加载需要用 <code>if __name__ == '__main__'</code> 包裹整个训练脚本，否则子进程会递归创建新进程。最简单的方案是设 <code>num_workers=0</code>，虽然慢一点，但至少不会崩。这个坑浪费了我整整一个下午。</p>
 
-# Windows (PowerShell)
-iex (irm https://hermes-agent.nousresearch.com/install.ps1)</code></pre>
+<h2>坑三：autograd 的 retain_graph</h2>
 
-<p>装完后用 <code>hermes setup --portal</code> 完成 OAuth 配置。这一步直接搞定三件事：接入模型提供商（默认 Nous Portal）、开通 Tool Gateway（web 搜索、图片生成、TTS、浏览器自动化四项工具）、生成 API key。全程大约 60 秒。</p>
+<p>我想在一个 batch 上算两次 loss——一次分类 loss，一次重构 loss——然后分别 backward。结果第二次 backward 时报 <code>Trying to backward through the graph a second time</code>。原来 PyTorch 默认 backward 后释放计算图，想多次反向传播必须设 <code>retain_graph=True</code>。但这也意味着显存不释放，batch 大了容易 OOM。后来学会了用 <code>loss = loss1 + loss2; loss.backward()</code> 合并，比 retain_graph 优雅得多。</p>
 
-<p>Hermes 把配置分成两层：<code>config.yaml</code> 放普通参数（模型、工具开关），<code>secrets.yaml</code> 放敏感信息（API key、token）。这种分离比把所有东西堆在一起清爽得多——至少不会不小心把 token 提交到 GitHub 上了。</p>
+<h2>坑四：model.train() vs model.eval() 的诡异 bug</h2>
 
-<h2>第一次对话：不只是聊天</h2>
+<p>训练 loss 一路下降，accuracy 也在涨，一切看起来完美——直到我开始做验证集评估。每次 eval 的准确率都比训练时低一截，而且波动巨大。排查了两天，突然意识到：<strong>忘记切 model.eval() 了</strong>。BatchNorm 在 train 模式下用的是当前 batch 的统计量，eval 时应该用全局 running mean/var。忘记切换导致的后果不是报错，而是悄无声息的性能下降——这种 bug 最难找。</p>
 
-<p>启动后你会看到一个终端 TUI，顶部是模型名、可用工具和已加载的 skills。Hermes 的默认行为就和其他 AI 聊天不同——它<strong>默认拥有终端执行权限</strong>。你不是在「问它问题」，而是在「让它做事」。</p>
+<h2>坑五：CUDA out of memory 排查</h2>
 
-<p>我试的第一个任务：</p>
+<p>batch_size 设了 128，跑了两个 epoch 就 OOM。第一反应是减小 batch_size，但改成 32 还是爆。后来用 <code>nvidia-smi</code> 发现显存占用一直在涨——原来我在循环里不停创建新 tensor 但没有 detach，计算图越积越大。解决方法是每个 batch 结束时 <code>loss.item()</code> 取标量值、中间结果加 <code>.detach()</code>，必要时清缓存 <code>torch.cuda.empty_cache()</code>。</p>
 
-<pre><code>$ hermes
-> 帮我在当前目录初始化一个 Python 项目，用 FastAPI 写一个 hello world</code></pre>
+<p>回头看，这五个坑每个都花了不少时间，但踩过之后对 PyTorch 的底层机制理解深了很多。框架不是黑箱——报错信息虽然吓人，但仔细读总能找到线索。</p>
 
-<p>Agent 的动作序列：</p>
-<ol>
-<li>读取当前目录结构（<code>ls</code>）</li>
-<li>创建 <code>main.py</code>（<code>write_file</code>）</li>
-<li>创建 <code>requirements.txt</code>（<code>write_file</code>）</li>
-<li>运行 <code>pip install -r requirements.txt</code>（<code>terminal</code>）</li>
-<li>启动 uvicorn 验证服务响应（<code>terminal</code>）</li>
-<li>完成后汇报结果</li>
-</ol>
-
-<p>没有「建议你这样写代码」的废话——直接读到、写到、跑到、验证完。这个执行闭环在传统聊天式 AI 里是做不到的。</p>
-
-<h2>最惊喜的功能：对话可以「恢复」</h2>
-
-<p>Hermes 有个细节设计让我印象很深——<strong>会话持久化</strong>。你在终端里输 <code>/new</code> 开启新对话，用 <code>/resume</code> 回到之前的会话。跟 AI 的对话不再是「一次性」的——它可以跨多次终端打开延续。</p>
-
-<p>这在处理复杂多步骤任务时特别有用。比如你下午写了一半的 API 接口，晚上回来 <code>/resume</code>，Agent 记得你做到哪了、文件路径、测试结果——不需要重新交代一遍上下文。</p>
-
-<p>文档里提到 Hermes 支持 <strong>Memory 系统</strong>，分两个文件：<code>MEMORY.md</code> 存环境和经验，<code>USER.md</code> 存用户身份和偏好。每次新会话启动时，这些内容会被注入系统 prompt。我在第一周还没深入用这个功能，但已经在每次交互中感受到 Agent 在「学习」我的工作习惯。</p>
-
-<h2>安全和隔离</h2>
-
-<p>Hermes 的终端能力是它的核心优势，但也是最大的安全考量。官方提供了几种隔离方案：</p>
-
-<ul>
-<li><strong>Docker 容器模式</strong>：Agent 在独立容器内执行命令，不影响宿主机</li>
-<li><strong>SSH 远程模式</strong>：Agent 通过 SSH 连接到远程服务器工作</li>
-<li><strong>命令审批模式</strong>：高危操作（rm、sudo）需要用户手动确认</li>
-</ul>
-
-<p>我用的是 Docker 隔离——配置一行 <code>backend: docker</code> 就够了。Agent 的所有文件操作、pip 安装、服务器启动都在独立容器里，即使出错也不会影响宿主机环境。</p>
-
-<p style="color:var(--text-tertiary);font-size:13px">--- 约 740 字</p>
+<p style="color:var(--text-tertiary);font-size:13px">--- 约 700 字</p>
 
 </article>
 <footer class="blog-footer">
