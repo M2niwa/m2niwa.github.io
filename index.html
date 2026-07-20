@@ -665,7 +665,7 @@ body { cursor: none; }
 .mag-pointer span:nth-child(3) { bottom: 0; left: 0; border-right: none; border-top: none; }
 .mag-pointer span:nth-child(4) { bottom: 0; right: 0; border-left: none; border-top: none; }
 .mag-cross {
-  position: absolute; top: 50%; left: 50%;
+  position: fixed; z-index: 9999;
   width: 12px; height: 12px;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -682,7 +682,7 @@ body { cursor: none; }
   top: 50%; left: 0; width: 100%; height: 1px;
   transform: translateY(-50%);
 }
-@media (hover: none), (pointer: coarse) { .mag-pointer { display: none; } body { cursor: auto; } }
+@media (hover: none), (pointer: coarse) { .mag-pointer, .mag-cross { display: none; } body { cursor: auto; } }
 
 /* ===== SLASH LOADING INTRO ===== */
 .slash-overlay {
@@ -726,9 +726,9 @@ body { cursor: none; }
 </div>
 
 <!-- Magnetic cursor -->
+<div class="mag-cross" id="magCross"></div>
 <div class="mag-pointer" id="magPointer">
   <span></span><span></span><span></span><span></span>
-  <div class="mag-cross"></div>
 </div>
 
 <!-- ===== HEADER ===== -->
@@ -1285,7 +1285,8 @@ document.head.appendChild(style);
 /* ===== MAGNETIC CURSOR ===== */
 (function() {
   var pointer = document.getElementById('magPointer');
-  if (!pointer || window.matchMedia('(hover: none), (pointer: coarse)').matches) return;
+  var cross = document.getElementById('magCross');
+  if (!pointer || !cross || window.matchMedia('(hover: none), (pointer: coarse)').matches) return;
 
   var currentTarget = null;
 
@@ -1293,6 +1294,13 @@ document.head.appendChild(style);
   var magnetic = '.header-nav a, .header-social a, .technote-item, .project-card, ' +
     '.blog-more-btn, .lang-switch, .wine-shuffle-btn, .scroll-top, .contact-item, .hero-btn, .skill-group';
 
+  // Cross always follows exact mouse position
+  window.addEventListener('mousemove', function(e) {
+    cross.style.left = e.clientX + 'px';
+    cross.style.top = e.clientY + 'px';
+  }, { passive: true });
+
+  // Magnetic corners lerp toward target
   function move(e) {
     var x = e.clientX, y = e.clientY;
     if (currentTarget) {
