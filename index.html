@@ -650,7 +650,7 @@ body { cursor: none; }
   --w: clamp(20px, 2.5vmin, 40px);
   --h: clamp(20px, 2.5vmin, 40px);
   --corner: clamp(5px, 0.6vmin, 9px);
-  position: fixed; z-index: 9998;
+  position: fixed; z-index: 10000;
   top: calc(var(--h) / -2); left: calc(var(--w) / -2);
   width: var(--w); height: var(--h);
   transition: width 0.25s ease-out, height 0.25s ease-out;
@@ -667,7 +667,7 @@ body { cursor: none; }
 .mag-pointer span:nth-child(3) { bottom: 0; left: 0; border-right: none; border-top: none; }
 .mag-pointer span:nth-child(4) { bottom: 0; right: 0; border-left: none; border-top: none; }
 .mag-cross {
-  position: fixed; z-index: 9999;
+  position: fixed; z-index: 10001;
   width: clamp(10px, 1.2vmin, 18px);
   height: clamp(10px, 1.2vmin, 18px);
   transform: translate(-50%, -50%);
@@ -744,6 +744,7 @@ body { cursor: none; }
       <a href="#skills" data-en="Skills">技能</a>
       <a href="#technotes" data-en="Blog">博客</a>
       <a href="#projects" data-en="Projects">项目</a>
+      <a href="#games" data-en="Games">游戏</a>
       <a href="#lifestyle" data-en="Lifestyle">兴趣</a>
       <a href="#diy" data-en="DIY">DIY</a>
       <a href="#contact" data-en="Contact">联系</a>
@@ -860,6 +861,16 @@ body { cursor: none; }
     </div>
     <div class="projects-grid">
       <div class="project-card">
+        <h3 data-en="📁 Portfolio">📁 作品集</h3>
+        <p data-en="Game design docs, system design drafts, creative writing — a curated collection of work across disciplines.">游戏策划案、系统设计稿、创意写作——跨领域的作品归档。</p>
+        <div class="project-tags">
+          <span class="tag">设计文档</span>
+          <span class="tag">策划案</span>
+        </div>
+        <a class="project-link" href="/portfolio.pdf" target="_blank" data-en="View →">查看 →</a>
+        <a class="project-link" href="/portfolio.pdf" download style="margin-left:16px" data-en="Download ↓">下载 ↓</a>
+      </div>
+      <div class="project-card">
         <h3 data-en="🐱 Pet Face Recognition System">🐱 宠物面部识别系统</h3>
         <p data-en="Lightweight pet recognition with MobileNet-V3. F1 96%, accuracy 82%, 20+ fps on edge devices. Awarded Excellent Thesis.">基于 MobileNet-V3 的轻量化宠物个体特征识别。F1 96%、识别率 82%，边缘设备 20+ fps。获评优秀毕设。</p>
         <div class="project-tags">
@@ -912,6 +923,28 @@ body { cursor: none; }
           <span class="tag">Workflow</span>
         </div>
         <a class="project-link" href="https://github.com/M2niwa/script-translator" target="_blank" rel="noopener">GitHub →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MINI GAMES ===== -->
+<section class="section" id="games">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Play</div>
+      <h2 class="section-title" data-en="Mini Games">小游戏</h2>
+      <p class="section-desc" data-en="Browser games built for fun">纯前端小游戏，打开即玩</p>
+    </div>
+    <div class="projects-grid">
+      <div class="project-card">
+        <h3>🌌 引力回响 · GRAVITY ECHO</h3>
+        <p>粒子避障射击游戏。用引力场收集能量，躲避敌舰，连击得分——Canvas 渲染，纯前端运行。</p>
+        <div class="project-tags">
+          <span class="tag">Canvas</span>
+          <span class="tag">Game</span>
+        </div>
+        <a class="project-link" href="/game.html" target="_blank">开始游戏 →</a>
       </div>
     </div>
   </div>
