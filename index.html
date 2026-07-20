@@ -1255,8 +1255,8 @@ document.head.appendChild(style);
       }});
     }
   });
-  tl.to(katana, { y: function() { return -katana.getBoundingClientRect().height / 2; }, duration: 0.4, ease: 'power4.out', delay: 0.5 })
-    .to(katana, { y: function() { return -katana.getBoundingClientRect().height / 2 - innerHeight; }, x: function() { return innerWidth; }, duration: 0.4, ease: 'power4.inout' }, '<0.3');
+  tl.to(katana, { y: function() { return -katana.getBoundingClientRect().height / 2; }, duration: 0.7, ease: 'power3.out', delay: 1 })
+    .to(katana, { y: function() { return -katana.getBoundingClientRect().height / 2 - innerHeight; }, x: function() { return innerWidth; }, duration: 0.6, ease: 'power3.in' }, '<0.5');
 
   window.addEventListener('resize', function() { if (tl) tl.invalidate(); });
 })();
