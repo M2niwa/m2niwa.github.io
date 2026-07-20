@@ -246,8 +246,9 @@ body::before {
   display: flex; align-items: center; gap: 16px; margin-bottom: 12px;
 }
 .skill-name {
-  width: 130px; font-size: 14px; font-weight: 500;
+  width: 145px; font-size: 14px; font-weight: 500;
   color: var(--text-secondary); text-align: right; flex-shrink: 0;
+  white-space: nowrap;
 }
 .skill-track {
   flex: 1; height: 6px; background: rgba(255,255,255,0.05);
@@ -572,7 +573,7 @@ body::before {
   .section-header { margin-bottom: 32px; }
 
   .skills-grid { grid-template-columns: 1fr; gap: 24px; }
-  .skill-name { width: 90px; font-size: 13px; }
+  .skill-name { width: 105px; font-size: 12px; white-space: nowrap; }
 
   .lifestyle-grid { grid-template-columns: 1fr; gap: 28px; }
   .wine-compact { grid-template-columns: 1fr 1fr; }
@@ -1270,7 +1271,7 @@ document.head.appendChild(style);
 
   // Elements that attract the cursor
   var magnetic = '.header-nav a, .header-social a, .technote-item, .project-card, ' +
-    '.blog-more-btn, .lang-switch, .wine-shuffle-btn, .scroll-top, .contact-item, .hero-btn';
+    '.blog-more-btn, .lang-switch, .wine-shuffle-btn, .scroll-top, .contact-item, .hero-btn, .skill-item';
 
   function move(e) {
     var x = e.clientX, y = e.clientY;
