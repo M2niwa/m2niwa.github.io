@@ -645,6 +645,7 @@ html.en .tag { font-size: 11px; }
 }
 
 /* ===== MAGNETIC CURSOR ===== */
+body { cursor: none; }
 .mag-pointer {
   --w: 24px; --h: 24px;
   position: fixed; z-index: 9998;
@@ -663,7 +664,25 @@ html.en .tag { font-size: 11px; }
 .mag-pointer span:nth-child(2) { top: 0; right: 0; border-left: none; border-bottom: none; }
 .mag-pointer span:nth-child(3) { bottom: 0; left: 0; border-right: none; border-top: none; }
 .mag-pointer span:nth-child(4) { bottom: 0; right: 0; border-left: none; border-top: none; }
-@media (hover: none), (pointer: coarse) { .mag-pointer { display: none; } }
+.mag-cross {
+  position: absolute; top: 50%; left: 50%;
+  width: 12px; height: 12px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.mag-cross::before, .mag-cross::after {
+  content: ''; position: absolute;
+  background: var(--blue);
+}
+.mag-cross::before {
+  top: 0; left: 50%; width: 1px; height: 100%;
+  transform: translateX(-50%);
+}
+.mag-cross::after {
+  top: 50%; left: 0; width: 100%; height: 1px;
+  transform: translateY(-50%);
+}
+@media (hover: none), (pointer: coarse) { .mag-pointer { display: none; } body { cursor: auto; } }
 
 /* ===== SLASH LOADING INTRO ===== */
 .slash-overlay {
@@ -709,6 +728,7 @@ html.en .tag { font-size: 11px; }
 <!-- Magnetic cursor -->
 <div class="mag-pointer" id="magPointer">
   <span></span><span></span><span></span><span></span>
+  <div class="mag-cross"></div>
 </div>
 
 <!-- ===== HEADER ===== -->
