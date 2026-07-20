@@ -647,7 +647,9 @@ html.en .tag { font-size: 11px; }
 /* ===== MAGNETIC CURSOR ===== */
 body { cursor: none; }
 .mag-pointer {
-  --w: 24px; --h: 24px;
+  --w: clamp(20px, 2.5vmin, 40px);
+  --h: clamp(20px, 2.5vmin, 40px);
+  --corner: clamp(5px, 0.6vmin, 9px);
   position: fixed; z-index: 9998;
   top: calc(var(--h) / -2); left: calc(var(--w) / -2);
   width: var(--w); height: var(--h);
@@ -656,8 +658,8 @@ body { cursor: none; }
 }
 .mag-pointer span {
   position: absolute;
-  width: 6px; height: 6px;
-  border: 2px solid var(--blue);
+  width: var(--corner); height: var(--corner);
+  border: clamp(1.5px, 0.2vmin, 2.5px) solid var(--blue);
   border-radius: 1px;
 }
 .mag-pointer span:nth-child(1) { top: 0; left: 0; border-right: none; border-bottom: none; }
@@ -666,7 +668,8 @@ body { cursor: none; }
 .mag-pointer span:nth-child(4) { bottom: 0; right: 0; border-left: none; border-top: none; }
 .mag-cross {
   position: fixed; z-index: 9999;
-  width: 12px; height: 12px;
+  width: clamp(10px, 1.2vmin, 18px);
+  height: clamp(10px, 1.2vmin, 18px);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -1328,8 +1331,8 @@ document.head.appendChild(style);
     // Only reset if leaving the magnetic element entirely
     if (!e.relatedTarget || !e.relatedTarget.closest(magnetic)) {
       currentTarget = null;
-      pointer.style.setProperty('--w', '24px');
-      pointer.style.setProperty('--h', '24px');
+      pointer.style.setProperty('--w', '');
+      pointer.style.setProperty('--h', '');
     }
   });
 })();
