@@ -675,14 +675,15 @@ body { cursor: none; }
 }
 .mag-cross::before, .mag-cross::after {
   content: ''; position: absolute;
-  background: var(--blue);
+  background: #fff;
+  box-shadow: 0 0 4px rgba(59,130,246,0.8), 0 0 8px rgba(59,130,246,0.4);
 }
 .mag-cross::before {
-  top: 0; left: 50%; width: 1px; height: 100%;
+  top: 0; left: 50%; width: 1.5px; height: 100%;
   transform: translateX(-50%);
 }
 .mag-cross::after {
-  top: 50%; left: 0; width: 100%; height: 1px;
+  top: 50%; left: 0; width: 100%; height: 1.5px;
   transform: translateY(-50%);
 }
 @media (hover: none), (pointer: coarse) { .mag-pointer, .mag-cross { display: none; } body { cursor: auto; } }
