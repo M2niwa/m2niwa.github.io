@@ -194,12 +194,12 @@ body::after {
   padding: 60px 0 80px;
   position: relative;
 }
-/* Hero mouse spotlight */
+/* Hero mouse spotlight — on the full section, not just the inner hero div */
 .hero-spot {
-  position: absolute; inset: -40px;
-  background: radial-gradient(circle 300px at 50% 50%, rgba(232,192,80,0.08), transparent 70%);
+  position: absolute; inset: 0;
+  background: radial-gradient(circle 350px at 50% 50%, rgba(232,192,80,0.10), transparent 70%);
   pointer-events: none; z-index: 0;
-  transition: opacity 0.3s;
+  transition: background 0.15s ease-out;
 }
 .hero-avatar {
   width: 120px; height: 120px; border-radius: 50%; flex-shrink: 0;
@@ -305,6 +305,20 @@ body::after {
   box-shadow: 0 0 24px rgba(212,160,64,0.12), 0 12px 40px rgba(0,0,0,0.4);
 }
 .project-card:active { transform: translateY(0) scale(0.985); }
+/* CRT flicker shimmer on card hover */
+.project-card::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: linear-gradient(180deg, transparent 40%, rgba(232,200,96,0.04) 50%, transparent 60%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.project-card:hover::after {
+  opacity: 1;
+  animation: crtFlicker 0.15s steps(2) infinite;
+}
+@keyframes crtFlicker {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+}
 .project-card::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
   background: linear-gradient(90deg, var(--blue), var(--indigo));
@@ -522,6 +536,16 @@ body::after {
   border-radius: var(--radius); padding: 24px 28px; text-decoration: none;
   color: inherit; transition: all 0.25s var(--ease);
   position: relative; overflow: hidden;
+}
+/* CRT flicker on blog cards too */
+.technote-item::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: linear-gradient(180deg, transparent 40%, rgba(232,200,96,0.03) 50%, transparent 60%);
+  opacity: 0; transition: opacity 0.3s;
+}
+.technote-item:hover::after {
+  opacity: 1;
+  animation: crtFlicker 0.15s steps(2) infinite;
 }
 .technote-item::before {
   content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
@@ -1400,6 +1424,7 @@ document.head.appendChild(style);
   var ctx = canvas.getContext('2d');
   var W, H, particles = [];
   var mouse = { x: -1000, y: -1000 };
+  var scrollY = 0;
 
   function resize() {
     W = canvas.width = window.innerWidth;
@@ -1407,6 +1432,7 @@ document.head.appendChild(style);
   }
   resize();
   window.addEventListener('resize', resize);
+  window.addEventListener('scroll', function() { scrollY = window.scrollY; }, { passive: true });
 
   // Create particles
   var colors = [
@@ -1423,7 +1449,8 @@ document.head.appendChild(style);
       vy: -Math.random() * 0.4 - 0.1,
       alpha: Math.random() * 0.4 + 0.1,
       color: colors[Math.floor(Math.random() * colors.length)],
-      phase: Math.random() * Math.PI * 2
+      phase: Math.random() * Math.PI * 2,
+      depth: Math.random() * 0.8 + 0.2  // parallax depth factor
     });
   }
 
@@ -1434,12 +1461,13 @@ document.head.appendChild(style);
 
   function draw() {
     ctx.clearRect(0, 0, W, H);
+    var sy = scrollY * 0.3; // base parallax offset
     for (var i = 0; i < particles.length; i++) {
       var p = particles[i];
 
       // Gentle mouse repulsion
       var dx = p.x - mouse.x;
-      var dy = p.y - mouse.y;
+      var dy = p.y - (mouse.y - sy * p.depth);
       var dist = Math.sqrt(dx * dx + dy * dy);
       if (dist < 120 && dist > 0) {
         var force = (120 - dist) / 120 * 0.4;
@@ -1462,9 +1490,12 @@ document.head.appendChild(style);
       if (p.y < -10) p.y = H + 10;
       if (p.y > H + 10) { p.y = -10; p.x = Math.random() * W; }
 
-      // Draw
+      // Draw with parallax offset
+      var py = p.y + sy * p.depth;
+      if (py > H + 20) py -= H + 40;
+      if (py < -20) py += H + 40;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.arc(p.x, py, p.r, 0, Math.PI * 2);
       ctx.fillStyle = p.color + p.alpha + ')';
       ctx.fill();
     }
@@ -1475,18 +1506,19 @@ document.head.appendChild(style);
 
 /* ===== HERO SPOTLIGHT + CARD 3D TILT + SCROLL REVEAL ===== */
 (function() {
-  // Hero spotlight follows mouse
+  // Hero spotlight follows mouse — use section container for full width
   var spot = document.getElementById('heroSpot');
-  var hero = document.getElementById('hero');
-  if (spot && hero) {
-    hero.addEventListener('mousemove', function(e) {
-      var r = hero.getBoundingClientRect();
+  var heroSec = document.getElementById('hero');
+  if (spot && heroSec) {
+    var container = heroSec.querySelector('.container');
+    heroSec.addEventListener('mousemove', function(e) {
+      var r = container.getBoundingClientRect();
       var x = e.clientX - r.left;
       var y = e.clientY - r.top;
-      spot.style.background = 'radial-gradient(circle 300px at ' + x + 'px ' + y + 'px, rgba(232,192,80,0.10), transparent 70%)';
+      spot.style.background = 'radial-gradient(circle 350px at ' + x + 'px ' + y + 'px, rgba(232,192,80,0.12), transparent 70%)';
     });
-    hero.addEventListener('mouseleave', function() {
-      spot.style.background = 'radial-gradient(circle 300px at 50% 50%, rgba(232,192,80,0.08), transparent 70%)';
+    heroSec.addEventListener('mouseleave', function() {
+      spot.style.background = 'radial-gradient(circle 350px at 50% 50%, rgba(232,192,80,0.10), transparent 70%)';
     });
   }
 
