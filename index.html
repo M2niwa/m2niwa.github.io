@@ -410,6 +410,52 @@ body::after {
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
+/* ===== FLOATING DASHBOARD SIDEBAR ===== */
+.dash-float {
+  position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
+  z-index: 40;
+  background: rgba(15,17,23,0.92);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 14px;
+  min-width: 140px;
+  transition: opacity 0.3s, transform 0.3s;
+}
+.dash-float.hidden { opacity: 0; pointer-events: none; }
+.dash-row { display: flex; align-items: center; gap: 10px; }
+.dash-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
+.dash-info { flex: 1; min-width: 0; }
+.dash-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 1px; }
+.dash-bar-wrap { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.dash-bar { height: 100%; border-radius: 2px; transition: width 0.6s var(--ease), background 0.4s; }
+.dash-value { font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-secondary); margin-top: 2px; }
+.dash-status { display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px solid var(--border); }
+.dash-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.dash-dot.warn { background: var(--amber); }
+.dash-dot.off { background: var(--red); }
+.dash-uptime { font-size: 10px; color: var(--text-tertiary); }
+
+@media (max-width: 768px) {
+  .dash-float {
+    position: fixed; right: 0; bottom: 0; left: 0; top: auto;
+    transform: none; border-radius: 0;
+    flex-direction: row; align-items: center; gap: 0;
+    padding: 8px 16px; min-width: 0;
+    justify-content: space-around;
+    border-top: 1px solid var(--border);
+    border-right: none; border-bottom: none; border-left: none;
+  }
+  .dash-row { flex: 1; justify-content: center; gap: 6px; }
+  .dash-status { border-top: none; padding-top: 0; padding-left: 8px; border-left: 1px solid var(--border); }
+  .dash-label { display: none; }
+  .dash-bar-wrap { width: 40px; }
+  .dash-value { font-size: 10px; }
+  .dash-uptime { display: none; }
+}
+
 /* ===== LIFESTYLE MERGED ===== */
 .lifestyle-grid {
   display: grid;
@@ -640,14 +686,15 @@ html.en .tag { font-size: 11px; }
 .btn:active, .wine-card:active, .technote-item:active,
 .contact-card:active, .scroll-top:active, .game-chip:active { transform: scale(0.97); }
 
-/* ===== H5 TRICK #1: Scroll reveal ===== */
-.reveal {
-  opacity: 0; transform: translateY(24px);
-  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+/* ===== H5 TRICK #2: Hero mouse-follow glow ===== */
+.hero-glow {
+  position: fixed; pointer-events: none; z-index: 0;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
 }
-.reveal.visible {
-  opacity: 1; transform: translateY(0);
-}
+.hero-glow.hidden { opacity: 0; }
 
 /* ===== H5 TRICK #3: Smart header hide/show ===== */
 .header {
@@ -1239,6 +1286,32 @@ document.head.appendChild(style);
 
   document.querySelectorAll('.section-header, .project-card, .wine-mini, .lifestyle-col, .contact-card, .technote-item, .game-chip, .skill-group')
     .forEach(el => { el.classList.add('reveal'); observer.observe(el); });
+})();
+
+/* ============================================================
+   H5 TRICK #2: Hero mouse-follow glow
+   ============================================================ */
+(function() {
+  const glow = document.getElementById('heroGlow');
+  const hero = document.getElementById('hero');
+  if (!glow || !hero) return;
+
+  let ticking = false;
+  document.addEventListener('mousemove', (e) => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const rect = hero.getBoundingClientRect();
+        const inHero = e.clientY >= rect.top && e.clientY <= rect.bottom;
+        glow.classList.toggle('hidden', !inHero);
+        if (inHero) {
+          glow.style.left = e.clientX + 'px';
+          glow.style.top = e.clientY + 'px';
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
 })();
 
 /* ============================================================
