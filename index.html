@@ -199,14 +199,6 @@ body::after {
 .hero {
   display: flex; align-items: center; gap: 64px;
   padding: 60px 0 80px;
-  position: relative;
-}
-/* Hero mouse spotlight — on the full section, not just the inner hero div */
-.hero-spot {
-  position: absolute; inset: 0;
-  background: radial-gradient(circle 350px at 50% 50%, rgba(232,192,80,0.10), transparent 70%);
-  pointer-events: none; z-index: 0;
-  transition: background 0.15s ease-out;
 }
 .hero-avatar {
   width: 120px; height: 120px; border-radius: 50%; flex-shrink: 0;
@@ -868,7 +860,6 @@ body { cursor: none; }
 <section class="section" id="hero">
   <div class="container">
     <div class="hero">
-      <div class="hero-spot" id="heroSpot"></div>
       <div class="hero-avatar">M</div>
       <div class="hero-content">
         <div class="lang-switch-wrap">
@@ -1511,23 +1502,8 @@ document.head.appendChild(style);
   draw();
 })();
 
-/* ===== HERO SPOTLIGHT + CARD 3D TILT + SCROLL REVEAL ===== */
+/* ===== CARD 3D TILT + SCROLL REVEAL ===== */
 (function() {
-  // Hero spotlight follows mouse — use section container for full width
-  var spot = document.getElementById('heroSpot');
-  var heroSec = document.getElementById('hero');
-  if (spot && heroSec) {
-    heroSec.addEventListener('mousemove', function(e) {
-      var r = spot.getBoundingClientRect();
-      var x = e.clientX - r.left;
-      var y = e.clientY - r.top;
-      spot.style.background = 'radial-gradient(circle 350px at ' + x + 'px ' + y + 'px, rgba(232,192,80,0.12), transparent 70%)';
-    });
-    heroSec.addEventListener('mouseleave', function() {
-      spot.style.background = 'radial-gradient(circle 350px at 50% 50%, rgba(232,192,80,0.10), transparent 70%)';
-    });
-  }
-
   // 3D tilt on project cards
   var cards = document.querySelectorAll('.project-card');
   cards.forEach(function(card) {
