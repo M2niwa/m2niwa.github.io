@@ -192,6 +192,14 @@ body::after {
 .hero {
   display: flex; align-items: center; gap: 64px;
   padding: 60px 0 80px;
+  position: relative;
+}
+/* Hero mouse spotlight */
+.hero-spot {
+  position: absolute; inset: -40px;
+  background: radial-gradient(circle 300px at 50% 50%, rgba(232,192,80,0.08), transparent 70%);
+  pointer-events: none; z-index: 0;
+  transition: opacity 0.3s;
 }
 .hero-avatar {
   width: 120px; height: 120px; border-radius: 50%; flex-shrink: 0;
@@ -279,14 +287,17 @@ body::after {
 /* ===== PROJECT CARDS ===== */
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
+  perspective: 1200px;
 }
 .project-card {
   background: var(--bg-card); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 24px;
-  transition: all 0.25s var(--ease);
+  transition: box-shadow 0.4s, border-color 0.4s;
   position: relative; overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 .project-card:hover {
   border-color: var(--blue);
@@ -826,6 +837,7 @@ body { cursor: none; }
 <section class="section" id="hero">
   <div class="container">
     <div class="hero">
+      <div class="hero-spot" id="heroSpot"></div>
       <div class="hero-avatar">M</div>
       <div class="hero-content">
         <div class="lang-switch-wrap">
@@ -1402,11 +1414,11 @@ document.head.appendChild(style);
     'rgba(232,192,80,',   // gold
     'rgba(180,130,60,',   // bronze
   ];
-  for (var i = 0; i < 50; i++) {
+  for (var i = 0; i < 100; i++) {
     particles.push({
       x: Math.random() * W,
       y: Math.random() * H,
-      r: Math.random() * 2 + 0.8,
+      r: Math.random() * 2.5 + 1.2,
       vx: (Math.random() - 0.5) * 0.3,
       vy: -Math.random() * 0.4 - 0.1,
       alpha: Math.random() * 0.4 + 0.1,
@@ -1459,6 +1471,55 @@ document.head.appendChild(style);
     requestAnimationFrame(draw);
   }
   draw();
+})();
+
+/* ===== HERO SPOTLIGHT + CARD 3D TILT + SCROLL REVEAL ===== */
+(function() {
+  // Hero spotlight follows mouse
+  var spot = document.getElementById('heroSpot');
+  var hero = document.getElementById('hero');
+  if (spot && hero) {
+    hero.addEventListener('mousemove', function(e) {
+      var r = hero.getBoundingClientRect();
+      var x = e.clientX - r.left;
+      var y = e.clientY - r.top;
+      spot.style.background = 'radial-gradient(circle 300px at ' + x + 'px ' + y + 'px, rgba(232,192,80,0.10), transparent 70%)';
+    });
+    hero.addEventListener('mouseleave', function() {
+      spot.style.background = 'radial-gradient(circle 300px at 50% 50%, rgba(232,192,80,0.08), transparent 70%)';
+    });
+  }
+
+  // 3D tilt on project cards
+  var cards = document.querySelectorAll('.project-card');
+  cards.forEach(function(card) {
+    card.addEventListener('mousemove', function(e) {
+      var r = card.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - 0.5;
+      var y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = 'rotateY(' + (x * 8) + 'deg) rotateX(' + (-y * 8) + 'deg) translateZ(4px)';
+    });
+    card.addEventListener('mouseleave', function() {
+      card.style.transform = 'rotateY(0deg) rotateX(0deg) translateZ(0)';
+    });
+  });
+
+  // Scroll reveal — fade in only (no transform to avoid conflict with tilt/hover)
+  var revealEls = document.querySelectorAll('.technote-item, .project-card, .skill-group, .wine-compact');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  revealEls.forEach(function(el, i) {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity 0.5s ease-out ' + (i % 3) * 0.1 + 's';
+    observer.observe(el);
+  });
 })();
 
 /* ===== SLASH LOADING INTRO ===== */
