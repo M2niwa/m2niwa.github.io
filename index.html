@@ -1378,9 +1378,9 @@ document.head.appendChild(style);
     hide();
     return;
   }
-  setTimeout(hide, 4200);
+  setTimeout(hide, 4000);
 
-  const T_RISE = 600, T_SLASH = 1100, T_FADE = 320;
+  const T_RISE = 320, T_SLASH = 1000, T_FADE = 280;
   const t0 = performance.now();
   const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
   const easeInCubic = t => t * t * t;
@@ -1394,10 +1394,10 @@ document.head.appendChild(style);
 
     if (el < T_RISE) {
       const k = easeOutCubic(el / T_RISE);
-      katana.style.transform = 'translate3d(0,' + (-k * h * 0.5) + 'px,0)';
+      katana.style.transform = 'translate3d(' + ((vw - w) / 2) + 'px,' + (-k * h * 0.5) + 'px,0)';
     } else if (el < T_RISE + T_SLASH) {
       const k = easeInCubic((el - T_RISE) / T_SLASH);
-      const dx = k * (vw + w * 0.2);  // blade fully exits the right edge
+      const dx = (vw - w) / 2 + k * (vw + w * 0.2 - (vw - w) / 2); // centered start → exits right
       const dy = -(h * 0.5) - k * vh * 0.72;
       katana.style.transform = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
       // Masks follow the blade edge (the page itself is sliced open)
