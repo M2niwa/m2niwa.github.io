@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="沧澜废舰 · 海洋废土背包乱斗 Roguelike：拾荒远征、限容船舱、9类事件商人、散热/热容海战引擎与深海鱼雷——纯原生 HTML/Canvas，无依赖，打开即玩。">
+<title>沧澜废舰 · 海战背包乱斗 Roguelike</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%2308203c'/%3E%3Cpath d='M32 8 L44 56 H20 Z' fill='%235ad1ff'/%3E%3Crect x='26' y='22' width='12' height='14' rx='2' fill='%23e8b45a'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* 返回主页（站点接入） */
+  #back-home{position:fixed;left:14px;top:12px;z-index:999;padding:8px 14px;font-size:13px;
+    letter-spacing:.08em;text-decoration:none;color:#5ad1ff;border:1px solid rgba(90,209,255,.4);
+    border-radius:6px;background:rgba(8,20,40,.65);backdrop-filter:blur(4px);opacity:.7;
+    transition:opacity .2s,border-color .2s}
+  #back-home:hover{opacity:1;border-color:#5ad1ff}
+</style>
+</head>
+<body>
+<a id="back-home" href="/index.html">← 返回主页</a>
+<div id="app">
+
+  <!-- ============ 主菜单 ============ -->
+  <section id="screen-menu" class="screen">
+    <div class="menu-bg">
+      <div class="sea sea-a"></div>
+      <div class="sea sea-b"></div>
+    </div>
+    <div class="menu-inner">
+      <div class="logo">
+        <div class="logo-sub">THE WASTELAND FLEET · 海洋废土背包乱斗</div>
+        <h1>沧澜废舰</h1>
+        <div class="logo-line"></div>
+      </div>
+      <div class="menu-btns">
+        <button id="btn-run-new" class="btn btn-primary btn-big">⛵ 新的远征</button>
+        <button id="btn-tutorial-battle" class="btn btn-big">⚔ 战斗教程</button>
+        <button id="btn-world" class="btn btn-big">🌍 世界地图</button>
+        <button id="btn-carrier-test" class="btn btn-big">🔬 航母测试</button>
+        <button id="btn-run-continue" class="btn btn-big">继续远征</button>
+        <button id="btn-help" class="btn btn-big">操作说明</button>
+        <button id="btn-tutorial" class="btn btn-big">新手教程</button>
+        <button id="btn-sound" class="btn btn-minor btn-big">音效：开</button>
+      </div>
+      <div class="menu-meta" id="menu-meta"></div>
+      <div class="menu-footer">联邦星历 12327 大断连 · 遗忘海域 · 六大势力 · 拾荒远征</div>
+    </div>
+  </section>
+
+  <!-- ============ 远征界面 ============ -->
+  <section id="screen-run" class="screen hidden">
+    <div class="run-topbar panel">
+      <button id="btn-run-menu" class="btn btn-minor">☰ 菜单</button>
+      <div class="run-day">第 <b id="run-day">1</b> 天</div>
+      <div id="run-phase-track" class="run-phase-track"></div>
+      <div class="run-res">💰 <b id="run-gold" class="gold">0</b> · 🧰 <b id="run-stash-info"></b> · 🔧 OP <b id="run-op-info"></b></div>
+      <button id="btn-run-hold" class="btn btn-minor">🧰 船舱</button>
+    </div>
+
+    <div class="run-body">
+      <!-- 航线地图 -->
+      <div id="view-map" class="run-view">
+        <div class="map-panel panel">
+          <div class="panel-title">今日航线 <span class="hint">（事件×3 + 小战斗）×3 → 大战斗关卡</span></div>
+          <div class="route-desc" id="route-desc"></div>
+          <div class="route-log" id="route-log"></div>
+          <div class="map-advance"><button id="btn-advance" class="btn btn-primary">⛵ 启 航</button></div>
+        </div>
+      </div>
+
+      <!-- 事件 -->
+      <div id="view-event" class="run-view hidden">
+        <div class="event-panel panel">
+          <div class="event-title" id="event-title"></div>
+          <div class="event-flavor" id="event-flavor"></div>
+          <div id="event-choices" class="choice-grid"></div>
+          <div class="event-foot">
+            <button id="btn-event-leave" class="btn hidden">离 开 →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 战斗（不可选敌） -->
+      <div id="view-world" class="run-view hidden">
+        <div class="world-wrap">
+          <canvas id="world-canvas" width="1200" height="640" style="width:100%;display:block"></canvas>
+          <div id="world-log" class="world-log"></div>
+        </div>
+        <div id="world-menu" class="overlay overlay-lite hidden">
+          <div class="overlay-box panel">
+            <div class="overlay-title wm-title"></div>
+            <div class="wm-sub hint" style="text-align:center"></div>
+            <div class="overlay-btns" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center">
+              <button class="btn btn-tiny wm-act" data-act="talk">💬 风味对话</button>
+              <button class="btn btn-tiny wm-act" data-act="intel">🔍 询问情报</button>
+              <button class="btn btn-tiny wm-act" data-act="trade">⚖ 贸易</button>
+              <button class="btn btn-tiny wm-act" data-act="auto">⚔ 自动战斗</button>
+              <button class="btn btn-tiny btn-danger wm-act" data-act="fight">⚔ 直接开战</button>
+              <button class="btn btn-tiny wm-act" data-close="1">🕊 离开</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-battle" class="run-view hidden">
+        <div class="event-panel panel">
+          <div class="panel-title" id="battle-select-title">遭遇敌军舰队</div>
+          <div id="battle-choices" class="choice-grid"></div>
+        </div>
+      </div>
+
+      <!-- 仓库 -->
+      <div id="view-hold" class="run-view hidden">
+        <div class="hold-grid" id="hold-root"></div>
+      </div>
+
+      <!-- 改装 -->
+      <div id="view-refit" class="run-view hidden">
+        <div id="refit-root"></div>
+      </div>
+    </div>
+
+    <!-- 远征菜单 -->
+    <div id="run-menu" class="overlay hidden">
+      <div class="overlay-box panel">
+        <div class="overlay-title" style="font-size:22px">远征菜单</div>
+        <div class="overlay-btns">
+          <button id="btn-run-menu-resume" class="btn btn-primary">继续远征</button>
+          <button id="btn-run-menu-save" class="btn">保存并回主菜单</button>
+          <button id="btn-run-menu-abandon" class="btn btn-danger">放弃远征</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 通用弹窗（战利品/丢弃/僚舰替换/胜负） -->
+    <div id="run-end" class="overlay hidden"></div>
+
+    <div id="toast" class="toast hidden"></div>
+  </section>
+
+  <!-- ============ 战斗界面 ============ -->
+  <section id="screen-battle" class="screen hidden">
+    <canvas id="battle-canvas"></canvas>
+    <div class="vignette"></div>
+    <div class="scanlines"></div>
+
+    <div id="hud" class="hud">
+      <div class="hud-left panel">
+        <div class="hud-ship-name">
+          <span id="hud-ship-name">旗舰</span>
+          <span id="hud-ship-class" class="hud-class">侦察艇</span>
+        </div>
+        <div class="statbar">
+          <div class="statbar-label">船体</div>
+          <div class="bar bar-hull"><div id="bar-hull-fill" class="bar-fill"></div><span id="bar-hull-text" class="bar-text">100%</span></div>
+          <div class="bar bar-armor"><div id="bar-armor-fill" class="bar-fill"></div></div>
+          <div id="hud-dc-wrap" class="hidden">
+            <div class="statbar-label" style="margin-top:4px">损管护盾</div>
+            <div class="bar bar-dc"><div id="bar-dc-fill" class="bar-fill"></div><span id="bar-dc-text" class="bar-text"></span></div>
+          </div>
+        </div>
+        <div class="statbar">
+          <div class="statbar-label">热量</div>
+          <div class="bar bar-heat"><div id="bar-heat-hard" class="bar-heat-hard"></div><div id="bar-heat-fill" class="bar-fill"></div><span id="bar-heat-text" class="bar-text">0%</span></div>
+        </div>
+        <div class="statbar">
+          <div class="statbar-label">航速</div>
+          <div class="bar bar-speed"><div id="bar-speed-fill" class="bar-fill"></div><span id="bar-speed-text" class="bar-text">0 节</span></div>
+        </div>
+        <div id="hud-status" class="hud-status"></div>
+        <div class="hud-keys">
+          <button id="btn-vent" class="btn btn-tiny">散热 (V)</button>
+          <button id="btn-shield" class="btn btn-tiny">护盾 (X)</button>
+          <button id="btn-pause" class="btn btn-tiny">暂停 (空格)</button>
+        </div>
+      </div>
+
+      <div class="hud-groups panel" id="hud-groups"></div>
+
+      <div class="hud-cons panel" id="hud-consumables"></div>
+
+      <div class="hud-right">
+        <div class="panel hud-target">
+          <div class="panel-title">锁定目标</div>
+          <div id="target-info" class="target-info">未锁定目标（Tab / R 锁定）</div>
+        </div>
+        <div class="panel hud-minimap-panel">
+          <canvas id="minimap" width="210" height="140"></canvas>
+        </div>
+        <div class="panel hud-feed" id="hud-feed"></div>
+      </div>
+
+      <div class="hud-tips panel" id="hud-tips"></div>
+    </div>
+    <div id="hud-tutorial" class="hud-tutorial hidden"></div>
+
+    <div id="overlay-pause" class="overlay overlay-lite hidden">
+      <div class="overlay-box panel">
+        <div class="overlay-title" style="font-size:22px">已暂停</div>
+        <div class="overlay-btns">
+          <button id="btn-resume" class="btn btn-primary">继续战斗</button>
+          <button id="btn-pause-retreat" class="btn btn-danger">撤退（远征失败）</button>
+          <button id="btn-pause-menu" class="btn">放弃远征（回主菜单）</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="overlay-tutdone" class="overlay overlay-lite hidden">
+      <div class="overlay-box panel">
+        <div class="overlay-title">战斗教程完成</div>
+        <p style="text-align:center;line-height:1.8;padding:8px 16px">现在你是一名优秀的舰长了，<b style="color:#ffd27a">去用鱼雷艇单杀战列舰吧！</b></p>
+        <div class="overlay-btns"><button id="btn-tutdone-exit" class="btn btn-primary">✈ 去远征</button></div>
+      </div>
+    </div>
+
+    <div id="overlay-result" class="overlay hidden">
+      <div class="overlay-box panel result-box">
+        <div class="overlay-title" id="result-title">胜利</div>
+        <div id="result-stats" class="result-stats"></div>
+        <div class="overlay-btns">
+          <button id="btn-again" class="btn btn-primary">返回航线 →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 操作说明 ============ -->
+  <div id="overlay-help" class="overlay hidden">
+    <div class="overlay-box panel help-box">
+      <div class="overlay-title">操作说明</div>
+      <div class="help-body">
+        <div class="help-col">
+          <h3>远征流程</h3>
+          <p>联邦星历 12327「大断连」后，艾瑟瑞亚沦为海洋废土。你是<b>自由锚地的拾荒者</b>，在督府、铁穹重工、自治联盟、北境军阀与圣汐教会的夹缝中打捞生存。</p>
+          <p>每天航线：<b>（事件×3 + 小战斗）×3，最后一场大战斗关卡</b>。</p>
+          <p>事件节点先在 <b>9 类事件</b>中 4 选 1（商人、遭遇战、宝藏、发现金钱、补给基地、神秘残骸、军械试验场、雇佣兵营地、训练场），<b>选定后不可返回</b>；除商人可多买外，事件均为<b>单次选择</b>。</p>
+          <p><b>战斗不可选敌</b>：小战斗遭遇随机敌舰队、<b>必定掉落</b>战利品；大战斗是<b>关卡考验</b>，第 5 天的大战斗即最终 BOSS，胜利则通关。</p>
+          <p><b>每轮必有一位随机商人</b>：军火贩子/重炮行商/鱼雷行商/近防军火商/船坞掮客/图纸贩子/装配工坊/遗迹拾荒商/杂货铺，各自专卖不同货品；所有商人都挂着<b>半价「清仓货架」</b>——占位型廉价武器常驻。</p>
+          <p><b>军械试验场</b>：按伤害类型（动能/高爆/破片/光束）各摆一件武器，只能取走一件。</p>
+          <p><b>船舱</b>容量有限（初始 4 格，每天 +1，最多 8，遗物可再扩容）——物品要取舍！</p>
+          <p>点击顶部「🧰 船舱」随时管理装备，返回时会回到当前的节点页面。</p>
+        </div>
+        <div class="help-col">
+          <h3>战斗操作</h3>
+          <p><b>W/S</b> 前进/倒车 · <b>A/D</b> 转向 · <b>Q/E</b> 横推（前进最快、倒车其次、横推最慢，大船差距更大）</p>
+          <p><b>按住右键</b> 自动航向 · <b>左键</b> 开火 · <b>1~5</b> 选武器组 · <b>F</b> 组自动开火</p>
+          <p><b>V</b> 主动散热（不可中断：强制关盾、无法开火，持续到完全散热为止，热量越少散热越快）· <b>6/7/8</b> 使用消耗品 · <b>Tab/R</b> 锁敌 · <b>空格</b> 暂停 · <b>滚轮</b> 缩放</p>
+          <p><b>散热/热容</b>：总热量 = <b>热量</b>（开火/护盾维持，散热可排空）+ <b>淤热</b>（护盾吸收的硬损伤，只有关盾且热量散尽后才消退）；触及上限触发<b>指挥过载</b>——火力失能、护盾不再吸收，但<b>仍可移动</b>。OP 可调校散热/热容/护盾系数。</p>
+          <p><b>伤害类型（X 开关护盾）</b>：武器分高爆/动能/破片/光束——<b>动能对盾 2×</b>、高爆对盾 0.5×、破片对盾 0.25×、光束 1×；对装甲反过来（高爆 2×）。用动能拆盾、高爆撕甲、破片打裸船体；<b>开盾有维持热量</b>。</p>
+          <p><b>异形舰体</b>：双舟级双体舰 / 巨锤级锤头舰 / 星枢级十字舰 / 折戟级 L 形强袭舰，槽位布局各异。</p>
+          <p><b>炮塔旋转速度</b>：炮塔需旋转对准目标（提前量）后才能开火，小口径快、大口径慢。</p>
+          <p><b>鱼雷与导弹</b>：导弹是空中目标，<b>近防炮/光束都能拦截</b>；鱼雷走深水——<b>只有光束能拦截浅层的雷（靠近 260px 内）</b>，而且<b>深水鱼雷对吃水不足的小艇无效</b>（从船底穿过）。鱼雷/导弹/高爆弹命中后按<b>近炸引信范围结算伤害</b>（中心全额、边缘 30%），集火时小心误伤友军。</p>
+          <p>敌军 AI 随天数与威胁等级逼近人类反应速度（始终略慢半拍）。</p>
+          <p>撤退或旗舰沉没 = 远征失败，重开一局！</p>
+        </div>
+      </div>
+      <div class="overlay-btns">
+        <button id="btn-help-close" class="btn btn-primary">明白了</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="overlay-tutorial" class="overlay hidden">
+    <div class="overlay-box panel help-box">
+      <div class="overlay-title">新手教程 <span id="tut-progress" class="hint" style="float:right"></span></div>
+      <div id="tut-body" class="help-body" style="min-height:170px;display:block"></div>
+      <div class="overlay-btns" style="display:flex;gap:8px;justify-content:center">
+        <button id="btn-tut-prev" class="btn">← 上一步</button>
+        <button id="btn-tut-next" class="btn btn-primary">下一步 →</button>
+        <button id="btn-tutorial-close" class="btn btn-minor">跳过</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="js/util.js"></script>
+<script src="js/data.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+<script src="js/render.js"></script>
+<script src="js/run.js"></script>
+<script src="js/runfit.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/worlddata.js"></script>
+<script src="js/world.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

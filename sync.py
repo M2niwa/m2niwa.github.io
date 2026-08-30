@@ -41,4 +41,12 @@ if os.path.isdir(src_assets):
         shutil.rmtree(dst_assets)
     shutil.copytree(src_assets, dst_assets)
 
+# Copy game folder (苍澜废舰 Roguelike, 纯静态)
+src_game = os.path.join(os.path.dirname(SRC), "sea-bazaar")
+dst_game = os.path.join(os.path.dirname(DST), "sea-bazaar")
+if os.path.isdir(src_game):
+    if os.path.isdir(dst_game):
+        shutil.rmtree(dst_game)
+    shutil.copytree(src_game, dst_game)
+
 print(f"Pages static: {len(html)} chars, data-en count: {html.count('data-en=')}")
