@@ -1213,6 +1213,8 @@ const wines = [
   { name:'Jameson', emoji:'🥃', notes:'爱尔兰三次蒸馏调和威士忌。如丝绸般顺滑，蜂蜜、烤木、淡淡花香，不泥煤的温和风格，入门与老手皆宜。' },
   { name:'六代目百合', emoji:'🍶', notes:'鹿儿岛芋烧酎。甘薯蒸馏，酒体醇厚浓烈，入口有炙烤红薯的焦香与泥土感，尾韵温暖有力。六代传承的匠心之作。' },
   { name:'秩父百花 蜂蜜酒', emoji:'🍯', notes:'日本埼玉秩父蒸馏所限定款。以当地百花蜂蜜发酵酿制，甜而不腻，花香馥郁，似液体的春日花园，小批次珍品。' },
+  { name:'小江户 COEDO 琉璃', emoji:'🍺', notes:'小江户酒造(COEDO)的皮尔森。日本文化里"琉璃"是晴空般的湛蓝——酒体通透清澈、雪白头冠，微苦而平衡，极佳适饮性几乎能搭配任何菜品。(5.0% ABV，酒花儿标签：浅黄/清澈/微苦)' },
+  { name:'酿酒狗 Punk IPA', emoji:'🍺', notes:'酿酒狗的朋克宣言：以 Punk IPA 配方为底，Citra 等新世界酒花注入活力，松脂与热带果香直白叛逆，酒花罐里的"反叛者"。(6.5% ABV)' },
 ];
 
 const winesEn = [
@@ -1234,6 +1236,8 @@ const winesEn = [
   { name:'Jameson', emoji:'🥃', notes:'Triple-distilled Irish blend whiskey. Silk-smooth, honey, toasted wood, subtle florals. No peat, all warmth. Perfect for beginners and veterans alike.' },
   { name:'Rokudaime Yuri', emoji:'🍶', notes:'Kagoshima sweet potato shochu. Bold and intense, roasted sweet potato char, earthy depth. Warm powerful finish. Six generations of mastery.' },
   { name:'Chichibu Hyakka Mead', emoji:'🍯', notes:'Saitama Chichibu Distillery limited release. Local wildflower honey fermented — sweet but not cloying, floral bouquet. Liquid spring garden in a bottle.' },
+  { name:'COEDO Ruri Pilsner', emoji:'🍺', notes:'Ruri means sky-blue in Japanese — a crystal-clear pilsner with a snowy head, subtle balanced bitterness and great drinkability. Pairs with almost any dish. (5.0% ABV)' },
+  { name:'BrewDog Punk IPA', emoji:'🍺', notes:'BrewDog\'s punk manifesto: a Punk IPA base charged with Citra and other new-world hops — direct, rebellious pine and tropical fruit. (6.5% ABV)' },
 ];
 
 let shuffledWines = [];
@@ -1253,7 +1257,7 @@ const TYPE_BY_EMOJI = { '🥃': 'whisky', '🍺': 'beer', '🍶': 'sake', '🍸'
 
 /* Wine card photos: real bottle/glass shots from Wikimedia Commons (free licenses,
    attribution in assets/wines/CREDITS.md). Falls back to a type image by emoji. */
-const WINE_IMG = ['kavalan','talisker10','botanist','akashi','yumeno-kankobai','ise-kadoya-ipa','haihe-gose','deepthroat-ipa','citra-overlord-ipa','tiaodonghu-ipa','baihua-shendu-ipa','monkey-fist-ipa','glenlivet12','100-years-solitude','jw-black','jameson','rokudaime-yuri','chichibu-hyakka'];
+const WINE_IMG = ['kavalan','talisker10','botanist','akashi','yumeno-kankobai','ise-kadoya-ipa','haihe-gose','deepthroat-ipa','citra-overlord-ipa','tiaodonghu-ipa','baihua-shendu-ipa','monkey-fist-ipa','glenlivet12','100-years-solitude','jw-black','jameson','rokudaime-yuri','chichibu-hyakka','coedo-ruri','punk-ipa'];
 wines.forEach((w, i) => { w.img = WINE_IMG[i] || TYPE_BY_EMOJI[w.emoji] || 'whisky'; });
 winesEn.forEach((w, i) => { w.img = WINE_IMG[i] || TYPE_BY_EMOJI[w.emoji] || 'whisky'; });
 
