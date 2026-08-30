@@ -1350,7 +1350,6 @@ document.head.appendChild(style);
   const power3Out = t => 1 - Math.pow(1 - t, 3);
   const power3In = t => t * t * t;
   const t0 = performance.now();
-  let ySlashStart = null;
 
   function frame(now) {
     if (done) return;
@@ -1362,9 +1361,9 @@ document.head.appendChild(style);
     if (el < T_SLASH_START) {
       const y = -h / 2 * power3Out(Math.min(el / T_RISE, 1));
       katana.style.transform = 'translate3d(0px,' + y + 'px,0)';
-      if (ySlashStart === null) ySlashStart = y;
     } else if (el < T_SLASH_START + T_SLASH) {
-      if (ySlashStart === null) ySlashStart = -h / 2 * power3Out(T_SLASH_START / T_RISE);
+      // Blade position where the slash tween takes over (exact value at 200ms — no jump)
+      const ySlashStart = -h / 2 * power3Out(T_SLASH_START / T_RISE);
       const p = power3In((el - T_SLASH_START) / T_SLASH);
       const y = ySlashStart + ((-h / 2 - vh) - ySlashStart) * p;
       const x = p * vw;
