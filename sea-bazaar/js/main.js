@@ -102,8 +102,6 @@
       Renderer.registerShipSprites(['battleship','hammer','destroyer','lightCruiser','heavyCruiser','catamaran','cross','lship','carrier']);
       document.getElementById('btn-run-new').addEventListener('click', () => RunApp.newRun());
       document.getElementById('btn-tutorial-battle').addEventListener('click', () => RunApp.startTutorial());
-      document.getElementById('btn-carrier-test').addEventListener('click', () => RunApp.startCarrierTest());
-      document.getElementById('btn-world').addEventListener('click', () => WorldMap.open());
       document.getElementById('btn-run-continue').addEventListener('click', () => RunApp.continueRun());
       document.getElementById('btn-help').addEventListener('click', () => {
         document.getElementById('overlay-help').classList.remove('hidden');
