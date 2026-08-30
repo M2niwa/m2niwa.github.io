@@ -784,7 +784,7 @@ body { cursor: none; }
 .slash-wash {
   position: absolute; inset: 0; z-index: 3;
   background:
-    radial-gradient(ellipse at 68% 42%, rgba(255,224,150,0.30) 0%, rgba(212,160,64,0.14) 45%, transparent 72%);
+    radial-gradient(ellipse at 64% 44%, rgba(255,224,150,0.22) 0%, rgba(212,160,64,0.10) 42%, transparent 64%);
   opacity: 0;
   will-change: opacity;
 }
@@ -1395,15 +1395,16 @@ document.head.appendChild(style);
     katana.style.width = w + 'px';
 
     if (el < T_RISE) {
-      // Tip glides up from the bottom edge to ~30% viewport height, centered
+      // Tip glides up from the bottom edge to 25% viewport height, centered
       const k = easeOutCubic(el / T_RISE);
-      katana.style.transform = 'translate3d(' + ((vw - w) / 2) + 'px,' + (-k * vh * 0.70) + 'px,0)';
+      katana.style.transform = 'translate3d(' + ((vw - w) / 2) + 'px,' + (-k * vh * 0.75) + 'px,0)';
     } else if (el < T_RISE + T_SLASH) {
       const k = easeInCubic((el - T_RISE) / T_SLASH);
       const dxStart = (vw - w) / 2;
-      const dxEnd = vw - w * 0.8; // blade fully exits the right edge
+      const dxEnd = vw + w * 0.1; // blade fully exits the right edge
       const x = dxStart + k * (dxEnd - dxStart);
-      const y = -vh * 0.70 - k * vh * 0.75;
+      // Tip sweeps diagonally down-right, THROUGH the screen center (25% → 75% height)
+      const y = -vh * 0.75 + k * vh * 0.5;
       katana.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
       // Cut point = the blade TIP (top of the SVG), not the rect center
       const tipX = x + w * 0.4;
@@ -1429,13 +1430,13 @@ document.head.appendChild(style);
       }
       glint.style.opacity = String(glow);
       glint.style.transform = 'translate3d(' + tipX + 'px,' + (tipY + h * 0.06) + 'px,0) rotate(16deg)';
-      flash.style.opacity = String(Math.sin(pk * Math.PI) * 0.65);
-      wash.style.opacity = String(Math.sin(pk * Math.PI) * 0.55);
+      flash.style.opacity = String(Math.sin(pk * Math.PI) * 0.5);
+      wash.style.opacity = String(Math.sin(pk * Math.PI) * 0.4);
     } else if (el < T_RISE + T_SLASH + T_FADE) {
       // Page is fully visible through the cut; light, edges and blade settle away
       const k = (el - T_RISE - T_SLASH) / T_FADE;
-      flash.style.opacity = String(0.65 * (1 - k));
-      wash.style.opacity = String(0.55 * (1 - k));
+      flash.style.opacity = String(0.5 * (1 - k));
+      wash.style.opacity = String(0.4 * (1 - k));
       glint.style.opacity = String(0.9 * (1 - k));
       edgeA.style.opacity = String(0.9 * (1 - k));
       edgeB.style.opacity = String(0.9 * (1 - k));
