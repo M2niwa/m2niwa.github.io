@@ -493,8 +493,12 @@ body::after {
   box-shadow: 0 10px 28px rgba(212,160,64,0.10);
 }
 .wine-mini .wm-type { position: absolute; top: 8px; right: 10px; font-size: 13px; opacity: 0.85; }
-.wine-mini .wm-art { height: 62px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 8px; }
-.wine-mini .wm-art svg { height: 60px; width: auto; }
+.wine-mini .wm-art { height: 96px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 8px; }
+.wine-mini .wm-art img {
+  height: 92px; width: 74px; object-fit: cover; border-radius: 6px;
+  border: 1px solid rgba(196,156,88,0.18); box-shadow: 0 3px 14px rgba(0,0,0,0.35);
+  filter: saturate(0.92) contrast(1.02);
+}
 .wine-mini .wm-name { font-size: 13.5px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.3; }
 .wine-mini .wm-notes {
   font-size: 11px; color: var(--text-tertiary); line-height: 1.5;
@@ -1257,22 +1261,13 @@ function shuffleWines() {
 
 function getWines() { return document.documentElement.lang === 'en' ? winesEn : wines; }
 
-/* Bottle artwork: five shapes keyed by emoji (whisky / beer / sake / gin / mead),
-   drawn inline in the theme's single amber accent — no external images needed. */
 const TYPE_BY_EMOJI = { '🥃': 'whisky', '🍺': 'beer', '🍶': 'sake', '🍸': 'gin', '🍯': 'mead' };
 
-function bottleSVG(type, initial) {
-  const ART = {
-    whisky: '<path d="M17 2h6v14h-6z"/><path d="M17 16h6c8 0 12 4 12 12v30c0 4-3 6-6 6H11c-3 0-6-2-6-6V28C5 20 9 16 17 16z"/><rect x="12" y="31" width="16" height="21" rx="2" fill="#241c16" stroke="#d4a040" stroke-width="1" stroke-opacity="0.9"/><text x="20" y="45" font-size="10" font-weight="700" text-anchor="middle" fill="#d4a040" stroke="none" font-family="system-ui,sans-serif">@@@</text>',
-    beer: '<path d="M16 8h8v10h-8z"/><rect x="17.4" y="2.5" width="5.2" height="5" rx="1"/><path d="M16 18h8c5 0 8 3.5 8 10v30c0 4-3 5-5 5H13c-2 0-5-1-5-5V28c0-6.5 3-10 8-10z"/><rect x="12" y="33" width="16" height="19" rx="2" fill="#241c16" stroke="#d4a040" stroke-width="1" stroke-opacity="0.9"/><text x="20" y="46" font-size="10" font-weight="700" text-anchor="middle" fill="#d4a040" stroke="none" font-family="system-ui,sans-serif">@@@</text>',
-    sake: '<path d="M13 12h14c5 0 7 3 7 8v24c0 8-3 12-8 13H13c-5-1-8-5-8-13V20c0-5 2-8 8-8z"/><rect x="15" y="3" width="10" height="10" rx="2"/><rect x="12" y="24" width="16" height="20" rx="2" fill="#241c16" stroke="#d4a040" stroke-width="1" stroke-opacity="0.9"/><text x="20" y="38" font-size="10" font-weight="700" text-anchor="middle" fill="#d4a040" stroke="none" font-family="system-ui,sans-serif">@@@</text>',
-    gin: '<path d="M16 2h8v9h-8z"/><path d="M16 11h8c6 0 8 5 7.5 13L30 54c-.5 5-3 7-7 7h-6c-4 0-6.5-2-7-7L8.5 24C8 16 10 11 16 11z"/><rect x="13" y="31" width="14" height="21" rx="2" fill="#241c16" stroke="#d4a040" stroke-width="1" stroke-opacity="0.9"/><text x="20" y="45" font-size="10" font-weight="700" text-anchor="middle" fill="#d4a040" stroke="none" font-family="system-ui,sans-serif">@@@</text>',
-    mead: '<path d="M9 24h22c4 0 5 3 5 7v21c0 5-2 8-7 8H11c-5 0-7-3-7-8V31c0-4 1-7 5-7z"/><rect x="11" y="16" width="18" height="8" rx="2"/><rect x="11" y="34" width="18" height="16" rx="2" fill="#241c16" stroke="#d4a040" stroke-width="1" stroke-opacity="0.9"/><text x="20" y="45" font-size="10" font-weight="700" text-anchor="middle" fill="#d4a040" stroke="none" font-family="system-ui,sans-serif">@@@</text>',
-  };
-  const letter = (initial || '?').slice(0, 1).toUpperCase();
-  const art = (ART[type] || ART.whisky).replace('@@@', letter);
-  return '<svg viewBox="0 0 40 64" fill="rgba(232,200,96,0.10)" stroke="rgba(196,156,88,0.65)" stroke-width="1.4" aria-hidden="true">' + art + '</svg>';
-}
+/* Wine card photos: real bottle/glass shots from Wikimedia Commons (free licenses,
+   attribution in assets/wines/CREDITS.md). Falls back to a type image by emoji. */
+const WINE_IMG = ['kavalan','talisker10','botanist','akashi','yumeno-kankobai','ise-kadoya-ipa','haihe-gose','deepthroat-ipa','citra-overlord-ipa','tiaodonghu-ipa','baihua-shendu-ipa','monkey-fist-ipa','glenlivet12','100-years-solitude','jw-black','jameson','rokudaime-yuri','chichibu-hyakka'];
+wines.forEach((w, i) => { w.img = WINE_IMG[i] || TYPE_BY_EMOJI[w.emoji] || 'whisky'; });
+winesEn.forEach((w, i) => { w.img = WINE_IMG[i] || TYPE_BY_EMOJI[w.emoji] || 'whisky'; });
 
 function renderWines(items) {
   const container = document.getElementById('wineCompact');
@@ -1281,7 +1276,7 @@ function renderWines(items) {
   container.innerHTML = show.map(w => `
     <div class="wine-mini">
       <span class="wm-type">${w.emoji}</span>
-      <div class="wm-art">${bottleSVG(TYPE_BY_EMOJI[w.emoji], w.name)}</div>
+      <div class="wm-art"><img src="/assets/wines/${w.img}.jpg" alt="" loading="lazy" decoding="async"></div>
       <div class="wm-name">${w.name}</div>
       <div class="wm-notes">${w.notes}</div>
     </div>

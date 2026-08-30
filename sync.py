@@ -33,4 +33,12 @@ for name in ("robots.txt", "sitemap.xml"):
     if os.path.exists(src):
         shutil.copy(src, os.path.join(os.path.dirname(DST), name))
 
+# Copy image assets (wine card photos + credits)
+src_assets = os.path.join(os.path.dirname(SRC), "assets")
+dst_assets = os.path.join(os.path.dirname(DST), "assets")
+if os.path.isdir(src_assets):
+    if os.path.isdir(dst_assets):
+        shutil.rmtree(dst_assets)
+    shutil.copytree(src_assets, dst_assets)
+
 print(f"Pages static: {len(html)} chars, data-en count: {html.count('data-en=')}")
