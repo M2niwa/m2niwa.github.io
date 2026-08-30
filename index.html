@@ -3,9 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>M1NIWA — Developer & Designer</title>
+<title>M1NIWA — 霍凌志 · AI 开发 & 游戏策划</title>
+<meta name="description" content="霍凌志（M1NIWA）的个人网站：AI 开发、游戏策划、嵌入式 DIY，含 30 篇技术博客与精选作品集。">
+<meta name="theme-color" content="#1a1210">
+<link rel="canonical" href="https://m2niwa.pages.dev/">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231a1210'/%3E%3Ctext x='32' y='45' font-size='38' font-weight='700' text-anchor='middle' fill='%23d4a040' font-family='system-ui,sans-serif'%3EM%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="M1NIWA">
+<meta property="og:title" content="M1NIWA — 霍凌志 · AI 开发 & 游戏策划">
+<meta property="og:description" content="AI 开发、游戏策划、嵌入式 DIY 个人站，30 篇技术博客与精选作品集。">
+<meta property="og:url" content="https://m2niwa.pages.dev/">
+<meta name="twitter:card" content="summary">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<noscript><style>body{cursor:auto}#bgCanvas{display:none}.slash-overlay{display:none}</style></noscript>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "霍凌志 (M1NIWA)",
+  "url": "https://m2niwa.pages.dev/",
+  "email": "mailto:miniwakazeha@outlook.com",
+  "jobTitle": "AI Developer / Game Designer",
+  "sameAs": ["https://github.com/M2niwa"]
+}
+</script>
 <style>
 /* ============================================================
    M1NIWA v2 — Clean Dark Portfolio
@@ -20,7 +41,7 @@
   --border-hover: rgba(212, 168, 96, 0.30);
   --text: #efe4cf;
   --text-secondary: #b8a080;
-  --text-tertiary: #7a6850;
+  --text-tertiary: #9c8465;
   --blue: #d4a040;
   --blue-hover: #e8c060;
   --blue-bg: rgba(212, 160, 64, 0.10);
@@ -79,7 +100,7 @@ body::after {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
 
-::selection { background: rgba(59,130,246,0.3); color: #fff; }
+::selection { background: rgba(212,160,64,0.35); color: #1a1210; }
 
 /* ===== CONTAINER ===== */
 .container {
@@ -205,7 +226,7 @@ body::after {
   background: var(--blue);
   display: flex; align-items: center; justify-content: center;
   font-size: 48px; font-weight: 700; color: #fff;
-  box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px rgba(59,130,246,0.2);
+  box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px rgba(212,160,64,0.20);
 }
 .hero-content { flex: 1; }
 .hero-name {
@@ -279,7 +300,7 @@ body::after {
 }
 .skill-fill {
   height: 100%; border-radius: 3px;
-  background: linear-gradient(90deg, var(--blue), #60a5fa);
+  background: linear-gradient(90deg, var(--blue), var(--amber));
   transition: width 0.8s var(--ease);
 }
 
@@ -356,7 +377,7 @@ body::after {
 .wine-card:hover {
   border-color: var(--blue);
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(59,130,246,0.08);
+  box-shadow: 0 12px 40px rgba(212,160,64,0.10);
 }
 .wine-card .wine-emoji { font-size: 48px; margin-bottom: 12px; }
 .wine-card .wine-name {
@@ -386,7 +407,7 @@ body::after {
   content: ''; position: absolute; left: -25px; top: 4px;
   width: 12px; height: 12px; border-radius: 50%;
   background: var(--blue);
-  box-shadow: 0 0 12px rgba(59,130,246,0.3);
+  box-shadow: 0 0 12px rgba(212,160,64,0.3);
 }
 .timeline-year {
   font-size: 12px; font-weight: 600; color: var(--blue);
@@ -436,52 +457,6 @@ body::after {
   animation: blink 1s step-end infinite;
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-/* ===== FLOATING DASHBOARD SIDEBAR ===== */
-.dash-float {
-  position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
-  z-index: 40;
-  background: rgba(15,17,23,0.92);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 14px;
-  display: flex; flex-direction: column; gap: 14px;
-  min-width: 140px;
-  transition: opacity 0.3s, transform 0.3s;
-}
-.dash-float.hidden { opacity: 0; pointer-events: none; }
-.dash-row { display: flex; align-items: center; gap: 10px; }
-.dash-icon { font-size: 14px; width: 18px; text-align: center; flex-shrink: 0; }
-.dash-info { flex: 1; min-width: 0; }
-.dash-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin-bottom: 1px; }
-.dash-bar-wrap { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
-.dash-bar { height: 100%; border-radius: 2px; transition: width 0.6s var(--ease), background 0.4s; }
-.dash-value { font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-secondary); margin-top: 2px; }
-.dash-status { display: flex; align-items: center; gap: 6px; padding-top: 8px; border-top: 1px solid var(--border); }
-.dash-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-.dash-dot.warn { background: var(--amber); }
-.dash-dot.off { background: var(--red); }
-.dash-uptime { font-size: 10px; color: var(--text-tertiary); }
-
-@media (max-width: 768px) {
-  .dash-float {
-    position: fixed; right: 0; bottom: 0; left: 0; top: auto;
-    transform: none; border-radius: 0;
-    flex-direction: row; align-items: center; gap: 0;
-    padding: 8px 16px; min-width: 0;
-    justify-content: space-around;
-    border-top: 1px solid var(--border);
-    border-right: none; border-bottom: none; border-left: none;
-  }
-  .dash-row { flex: 1; justify-content: center; gap: 6px; }
-  .dash-status { border-top: none; padding-top: 0; padding-left: 8px; border-left: 1px solid var(--border); }
-  .dash-label { display: none; }
-  .dash-bar-wrap { width: 40px; }
-  .dash-value { font-size: 10px; }
-  .dash-uptime { display: none; }
-}
 
 /* ===== LIFESTYLE MERGED ===== */
 .lifestyle-grid {
@@ -613,7 +588,7 @@ body::after {
 .contact-card:hover {
   border-color: var(--blue);
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(59,130,246,0.08);
+  box-shadow: 0 10px 30px rgba(212,160,64,0.10);
 }
 .contact-icon { font-size: 32px; margin-bottom: 12px; }
 .contact-label { font-size: 15px; font-weight: 600; color: var(--text); }
@@ -723,26 +698,14 @@ html.en .tag { font-size: 11px; }
 .btn:active, .wine-card:active, .technote-item:active,
 .contact-card:active, .scroll-top:active, .game-chip:active { transform: scale(0.97); }
 
-/* ===== H5 TRICK #2: Hero mouse-follow glow ===== */
-.hero-glow {
-  position: fixed; pointer-events: none; z-index: 0;
-  width: 300px; height: 300px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
-  transform: translate(-50%, -50%);
-  transition: opacity 0.3s;
-}
-.hero-glow.hidden { opacity: 0; }
-
-/* ===== H5 TRICK #3: Smart header hide/show ===== */
-.header {
-  transition: transform 0.3s var(--ease);
-}
-.header.hidden {
-  transform: translateY(-100%);
-}
-
-/* ===== MAGNETIC CURSOR ===== */
 body { cursor: none; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 4px; }
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 10001;
+  background: var(--bg-elevated); color: var(--text);
+  padding: 10px 16px; border-radius: 0 0 8px 0; text-decoration: none;
+}
+.skip-link:focus { left: 0; }
 .mag-pointer {
   --w: clamp(20px, 2.5vmin, 40px);
   --h: clamp(20px, 2.5vmin, 40px);
@@ -785,53 +748,72 @@ body { cursor: none; }
 }
 @media (hover: none), (pointer: coarse) { .mag-pointer, .mag-cross { display: none; } body { cursor: auto; } }
 
-/* ===== SLASH LOADING INTRO ===== */
+/* ===== SLASH LOADING INTRO (JS-driven, no dependency) ===== */
 .slash-overlay {
   position: fixed; inset: 0; z-index: 10000;
   pointer-events: none;
+  overflow: hidden;
+  /* Pure-CSS watchdog: even if JS dies, the intro can never trap the page */
+  animation: slashFallbackHide 0.2s ease-out 2.6s forwards;
 }
+@keyframes slashFallbackHide { to { opacity: 0; visibility: hidden; } }
 .slash-bg {
   position: absolute; inset: 0;
-  background: #d4a040;
+  background:
+    radial-gradient(ellipse at 62% 45%, rgba(232,200,96,0.32) 0%, rgba(212,160,64,0.0) 55%),
+    #d4a040;
 }
 .slash-katana {
-  position: absolute; left: 0; top: 100%; z-index: 2;
-  width: 30vmin; height: auto;
+  position: absolute; left: 0; top: 100%;
+  width: 26vmin; height: auto;
+  will-change: transform;
+  filter: drop-shadow(0 0 14px rgba(232,200,96,0.55)) drop-shadow(0 0 42px rgba(255,224,140,0.25));
+}
+.slash-katana path { fill: #f2e3bd; }
+.slash-katana path + path { fill: #b8924a; }
+.slash-glint {
+  position: absolute; left: 0; top: 0; width: 2px; height: 78vh;
+  background: linear-gradient(180deg, transparent, rgba(255,244,214,0.95) 50%, transparent);
+  opacity: 0; will-change: transform, opacity;
+  transform: rotate(16deg);
 }
 .slash-mask {
   position: absolute; width: 100%; height: 100%; z-index: 1;
   background: var(--bg);
 }
 .slash-mask-up {
-  clip-path: polygon(0% 0%, 100% 0%, 0% 100%, 0% 100%);
-  transform-origin: left top; transform: scale(1.01);
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 }
 .slash-mask-down {
-  clip-path: polygon(100% 100%, 100% 0%, 0% 100%, 0% 100%);
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 }
-.slash-katana path { fill: #e4e6eb; }
-.slash-katana path + path { fill: #9ca3af; }
+@media (prefers-reduced-motion: reduce) {
+  .slash-overlay { display: none; }
+}
 </style>
 </head>
 <body>
 
+<a class="skip-link" href="#skills">跳到主要内容</a>
+
 <!-- Ambient particle canvas -->
-<canvas id="bgCanvas"></canvas>
+<canvas id="bgCanvas" aria-hidden="true"></canvas>
 
 <!-- ===== SLASH LOADING INTRO ===== -->
-<div class="slash-overlay" id="slashOverlay">
+<div class="slash-overlay" id="slashOverlay" aria-hidden="true">
   <div class="slash-bg"></div>
   <svg class="slash-katana" id="slashKatana" viewBox="0 0 68.49 760">
     <path d="M26.03,760H0C20.47,552.92,26.96,357.12,21.24,185.46h0C19.06,119.86,15.09,57.81,9.44,0c7.79,6.36,14.78,13.62,20.84,21.6,4.54,43.21,8.12,88.85,10.69,136.61h0c9.52,176.77,5.29,382.63-14.94,601.79Z"/>
     <path d="M68.49,384.66c0,117.73-5.36,244.02-16.6,375.34H26.03c20.23-219.16,24.46-425.02,14.94-601.78h0c-2.57-47.77-6.15-93.41-10.69-136.62,13.66,18.01,22.54,39.66,25.05,62.92.08.75.16,1.5.22,2.26,8.49,90.41,12.94,190.6,12.94,297.88Z"/>
   </svg>
+  <div class="slash-glint" id="slashGlint"></div>
   <div class="slash-mask slash-mask-up" id="slashMaskUp"></div>
   <div class="slash-mask slash-mask-down" id="slashMaskDown"></div>
 </div>
 
 <!-- Magnetic cursor -->
-<div class="mag-cross" id="magCross"></div>
-<div class="mag-pointer" id="magPointer">
+<div class="mag-cross" id="magCross" aria-hidden="true"></div>
+<div class="mag-pointer" id="magPointer" aria-hidden="true">
   <span></span><span></span><span></span><span></span>
 </div>
 
@@ -851,7 +833,7 @@ body { cursor: none; }
     </nav>
     <div class="header-social">
       <a href="https://github.com/m2niwa" target="_blank" rel="noopener" title="GitHub">🐙</a>
-      <button class="menu-toggle" id="menuToggle" aria-label="菜单">☰</button>
+      <button class="menu-toggle" id="menuToggle" aria-label="菜单" aria-expanded="false">☰</button>
     </div>
   </div>
 </header>
@@ -870,7 +852,10 @@ body { cursor: none; }
           </button>
         </div>
         <h1 class="hero-name" data-en="M1NIWA">M1NIWA</h1>
-        <p class="hero-bio" data-en="Huo Lingzhi · AI Dev & Game Designer · <br>DIY Enthusiast · Olfactory Explorer">霍凌志 · AI 开发 & 游戏策划 · <br>DIY 爱好者 · 嗅觉探索者</p>
+        <p class="hero-bio">
+          <span data-en="Huo Lingzhi · AI Dev & Game Designer">霍凌志 · AI 开发 & 游戏策划</span><br>
+          <span data-en="DIY Enthusiast · Olfactory Explorer">DIY 爱好者 · 嗅觉探索者</span>
+        </p>
         <div class="hero-tags">
           <span class="tag">Agent</span>
           <span class="tag">LLM & LoRA</span>
@@ -946,7 +931,7 @@ body { cursor: none; }
       <!-- JS renders 4 featured posts -->
     </div>
     <div class="blog-more-wrap">
-      <a href="/blog/index.html" class="blog-more-btn" data-en="View all 30 posts →">查看全部 30 篇文章 →</a>
+      <a href="/blog/index.html" class="blog-more-btn" data-en="View all 33 posts →">查看全部 33 篇文章 →</a>
     </div>
   </div>
 </section>
@@ -1065,7 +1050,7 @@ body { cursor: none; }
           <!-- JS renders 4 items -->
         </div>
         <button class="wine-shuffle-btn" id="wineShuffle" title="换一批">
-          <span class="shuffle-icon" data-en="🎲 Shuffle">🎲</span> 换一批
+          <span class="shuffle-icon">🎲</span> <span data-en="Shuffle">换一批</span>
         </button>
       </div>
       <div class="lifestyle-col">
@@ -1189,7 +1174,16 @@ updateActiveNav();
 /* ===== MOBILE MENU ===== */
 const menuToggle = document.getElementById('menuToggle');
 const headerNav = document.getElementById('headerNav');
-menuToggle.addEventListener('click', () => headerNav.classList.toggle('open'));
+menuToggle.addEventListener('click', () => {
+  headerNav.classList.toggle('open');
+  menuToggle.setAttribute('aria-expanded', headerNav.classList.contains('open'));
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && headerNav.classList.contains('open')) {
+    headerNav.classList.remove('open');
+    menuToggle.setAttribute('aria-expanded', 'false');
+  }
+});
 headerNav.querySelectorAll('a').forEach(a => {
   a.addEventListener('click', () => headerNav.classList.remove('open'));
 });
@@ -1267,11 +1261,6 @@ function doShuffle() {
   btn.classList.add('shuffling');
   shuffledWines = shuffleWines();
   renderWines(shuffledWines);
-  // Re-observe new elements
-  document.querySelectorAll('.wine-mini').forEach(el => {
-    el.classList.add('reveal');
-    setTimeout(() => el.classList.add('visible'), 50);
-  });
   setTimeout(() => btn.classList.remove('shuffling'), 500);
 }
 
@@ -1281,16 +1270,16 @@ renderWines();
 /* ===== TECH NOTES ===== */
 const techNotes = [
   { title:'FastAPI + PostgreSQL 性能调优：索引策略与连接池优化', summary:'从索引设计、查询优化和连接池配置三个维度，拆解 FastAPI 项目中 PostgreSQL 性能调优的实战经验。', url:'/blog/blog-1.html', date:'2026-07-05', tags:['FastAPI','PostgreSQL','性能'] },
-  { title:'Hermes 的自我进化：Skills 和 Memory 如何让 AI 越用越强', summary:'Skills 让工作流可复用，Memory 让偏好跨会话持久化——拆解 Hermes Agent「封闭学习循环」的工作原理和实战用法。', url:'/blog/blog-28.html', date:'2026-06-16', tags:['Hermes','Agent','自动化'] },
-  { title:'Python 生产级 Docker 镜像：从 1.2GB 到 120MB', summary:'一个 FastAPI 应用的 Docker 镜像瘦身历程——多阶段构建、Alpine 选型、依赖锁定与安全扫描。', url:'/blog/blog-4.html', date:'2026-05-27', tags:['Docker','Python','DevOps'] },
-  { title:'Harness Feature Flags + 灰度发布：降低部署风险的工程实践', summary:'Feature Flags 不只是开关——结合 Harness CD 的 Canary 部署策略，将部署事故从每月 3 次降到零的完整实践。', url:'/blog/blog-30.html', date:'2026-07-12', tags:['Harness','CI-CD','DevOps'] },
+  { title:'个人站上 Cloudflare Pages：网络路径与 SPA 回退配置', summary:'从 GitHub Pages 迁到 Cloudflare Pages 的网络观察——Anycast 边缘节点、大陆可达性，以及 _redirects/_headers 里值得抄的两条静态站配置。', url:'/blog/blog-33.html', date:'2026-04-08', tags:['DevOps','建站','网络'] },
+  { title:'断线重连策略：从 3 秒轮询到指数退避', summary:'固定间隔重连为何伤害服务器；带抖动的指数退避公式、应用层心跳和 visibilitychange 处理——来自实时仪表盘的踩坑实录。', url:'/blog/blog-31.html', date:'2025-08-25', tags:['WebSocket','前端','网络'] },
+  { title:'ComfyUI 本地部署：国内网络下的镜像源与模型复用', summary:'多 Python 与 CUDA torch 对齐、torchaudio DLL 兼容、Gitee 镜像与清华源，以及模型下载的格式陷阱与秋叶包复用。', url:'/blog/blog-32.html', date:'2025-07-08', tags:['ComfyUI','AI','工具'] },
 ];
 
 const techNotesEn = [
   { title:'FastAPI + PostgreSQL Performance: Indexing & Connection Pooling', summary:'Deep dive into PostgreSQL performance tuning for FastAPI — index design, query optimization, and connection pool configuration from real project experience.', url:'/blog/blog-1.html', date:'2026-07-05', tags:['FastAPI','PostgreSQL','Perf'] },
-  { title:'Hermes Self-Evolving Agent: Skills & Memory Deep Dive', summary:'How Skills and Memory form Hermes Agent\'s closed learning loop — reusable workflows, persistent preferences, and an agent that improves with every session.', url:'/blog/blog-28.html', date:'2026-06-16', tags:['Hermes','Agent','Automation'] },
-  { title:'Production Docker Images: 1.2GB to 120MB', summary:'How a FastAPI Docker image went on a diet — multi-stage builds, Alpine selection, dependency pinning, and security scanning with Trivy.', url:'/blog/blog-4.html', date:'2026-05-27', tags:['Docker','Python','DevOps'] },
-  { title:'Harness Feature Flags + Canary: Risk-Free Deployments in Practice', summary:'Feature Flags aren\'t just toggles — combined with Harness CD Canary strategy, deployment incidents dropped from 3/month to zero.', url:'/blog/blog-30.html', date:'2026-07-12', tags:['Harness','CI-CD','DevOps'] },
+  { title:'Moving to Cloudflare Pages: Network Path & SPA Fallback', summary:'From GitHub Pages to Cloudflare Pages — Anycast edges, mainland reachability, and two static-site configs worth stealing from _redirects/_headers.', url:'/blog/blog-33.html', date:'2026-04-08', tags:['DevOps','Hosting','Network'] },
+  { title:'Reconnect Strategy: From 3s Polling to Exponential Backoff', summary:'Why fixed-interval reconnects hurt your server; a jittered exponential backoff, app-level heartbeat, and visibilitychange handling from a live dashboard.', url:'/blog/blog-31.html', date:'2025-08-25', tags:['WebSocket','Frontend','Network'] },
+  { title:'ComfyUI on a Budget GPU: Mirrors & Model Reuse in China', summary:'Aligning multiple Pythons with CUDA torch, torchaudio DLL fixes, Gitee/tuna mirrors, and the model-format traps behind hf-mirror and ModelScope.', url:'/blog/blog-32.html', date:'2025-07-08', tags:['ComfyUI','AI','Tools'] },
 ];
 
 function renderTechNotes() {
@@ -1316,69 +1305,73 @@ const style = document.createElement('style');
 style.textContent = '@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }';
 document.head.appendChild(style);
 
-/* ============================================================
-   H5 TRICK #1: Intersection Observer — scroll reveal
-   ============================================================ */
+/* ===== SLASH LOADING INTRO — rAF-driven, zero dependencies ===== */
 (function() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+  const overlay = document.getElementById('slashOverlay');
+  const katana = document.getElementById('slashKatana');
+  const maskUp = document.getElementById('slashMaskUp');
+  const maskDown = document.getElementById('slashMaskDown');
+  const glint = document.getElementById('slashGlint');
+  if (!overlay || !katana || !maskUp || !maskDown) return;
 
-  document.querySelectorAll('.section-header, .project-card, .wine-mini, .lifestyle-col, .contact-card, .technote-item, .game-chip, .skill-group')
-    .forEach(el => { el.classList.add('reveal'); observer.observe(el); });
-})();
+  let done = false;
+  function hide() {
+    if (done) return;
+    done = true;
+    overlay.style.display = 'none';
+  }
+  // Safety nets: unsupported / reduced motion → skip instantly; watchdog → never trap the page.
+  if (!('requestAnimationFrame' in window) ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    hide();
+    return;
+  }
+  setTimeout(hide, 3200);
 
-/* ============================================================
-   H5 TRICK #2: Hero mouse-follow glow
-   ============================================================ */
-(function() {
-  const glow = document.getElementById('heroGlow');
-  const hero = document.getElementById('hero');
-  if (!glow || !hero) return;
+  const T_RISE = 420, T_SLASH = 700, T_FADE = 240;
+  const t0 = performance.now();
+  const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+  const easeInCubic = t => t * t * t;
 
-  let ticking = false;
-  document.addEventListener('mousemove', (e) => {
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        const rect = hero.getBoundingClientRect();
-        const inHero = e.clientY >= rect.top && e.clientY <= rect.bottom;
-        glow.classList.toggle('hidden', !inHero);
-        if (inHero) {
-          glow.style.left = e.clientX + 'px';
-          glow.style.top = e.clientY + 'px';
-        }
-        ticking = false;
-      });
-      ticking = true;
+  function frame(now) {
+    if (done) return;
+    const el = now - t0;
+    const vw = innerWidth, vh = innerHeight;
+    const w = 0.26 * Math.min(vw, vh);
+    const h = w * (760 / 68.49);
+
+    if (el < T_RISE) {
+      const k = easeOutCubic(el / T_RISE);
+      katana.style.transform = 'translate3d(0,' + (-k * h * 0.5) + 'px,0)';
+    } else if (el < T_RISE + T_SLASH) {
+      const k = easeInCubic((el - T_RISE) / T_SLASH);
+      const dx = k * (vw - w * 0.9);
+      const dy = -(h * 0.5) - k * vh * 0.72;
+      katana.style.transform = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
+      // Masks follow the blade edge (diagonal slash reveal)
+      const r = katana.getBoundingClientRect();
+      const cx = (r.left + r.width / 2) / vw * 100;
+      const cy = (r.top + r.height / 2) / vh * 100;
+      const my = Math.min(cy * 1.25, 100);
+      const dxp = Math.max(0, r.left / vw * 100);
+      maskUp.style.clipPath = 'polygon(0% 0%, 100% 0%, ' + cx + '% ' + cy + '%, 0% ' + my + '%)';
+      maskDown.style.clipPath = 'polygon(100% 100%, 100% 0%, ' + cx + '% ' + cy + '%, ' + dxp + '% 100%)';
+      // Blade glint sweeps with the tip
+      glint.style.opacity = String(Math.sin((el - T_RISE) / T_SLASH * Math.PI) * 0.9);
+      glint.style.transform = 'translate3d(' + (r.right - 1) + 'px,' + (r.top + r.height * 0.28) + 'px,0) rotate(16deg)';
+    } else if (el < T_RISE + T_SLASH + T_FADE) {
+      const k = (el - T_RISE - T_SLASH) / T_FADE;
+      overlay.style.opacity = String(1 - k);
+    } else {
+      hide();
+      return;
     }
-  });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
 })();
 
-/* ============================================================
-   H5 TRICK #3: Smart header hide on scroll down, show on scroll up
-   ============================================================ */
-(function() {
-  const header = document.getElementById('header');
-  let lastScroll = 0;
-  let ticking = false;
-
-  window.addEventListener('scroll', () => {
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
-        if (y < 100) { header.classList.remove('hidden'); }
-        else if (y > lastScroll + 8) { header.classList.add('hidden'); }
-        else if (y < lastScroll - 8) { header.classList.remove('hidden'); }
-        lastScroll = y;
-        ticking = false;
-      });
-      ticking = true;
-    }
-  }, { passive: true });
-})();
-/* ============================================================
-   LANGUAGE SWITCH (ZH / EN)
-   ============================================================ */
+/* ===== LANGUAGE SWITCH ===== */
 (function() {
   const root = document.getElementById('rootHtml');
   const sw = document.getElementById('langSwitch');
@@ -1419,6 +1412,8 @@ document.head.appendChild(style);
 (function() {
   var canvas = document.getElementById('bgCanvas');
   if (!canvas) return;
+  // Respect reduced motion — skip the particle field entirely
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var ctx = canvas.getContext('2d');
   var W, H, particles = [];
   var mouse = { x: -1000, y: -1000 };
@@ -1458,44 +1453,47 @@ document.head.appendChild(style);
   }, { passive: true });
 
   function draw() {
-    ctx.clearRect(0, 0, W, H);
-    var sy = scrollY * 0.3; // base parallax offset
-    for (var i = 0; i < particles.length; i++) {
-      var p = particles[i];
+    // Skip frame work while the tab is hidden (saves CPU/battery)
+    if (!document.hidden) {
+      ctx.clearRect(0, 0, W, H);
+      var sy = scrollY * 0.3; // base parallax offset
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
 
-      // Gentle mouse repulsion
-      var dx = p.x - mouse.x;
-      var dy = p.y - (mouse.y - sy * p.depth);
-      var dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 120 && dist > 0) {
-        var force = (120 - dist) / 120 * 0.4;
-        p.vx += dx / dist * force * 0.1;
-        p.vy += dy / dist * force * 0.1;
+        // Gentle mouse repulsion
+        var dx = p.x - mouse.x;
+        var dy = p.y - (mouse.y - sy * p.depth);
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120 && dist > 0) {
+          var force = (120 - dist) / 120 * 0.4;
+          p.vx += dx / dist * force * 0.1;
+          p.vy += dy / dist * force * 0.1;
+        }
+
+        // Drift + sine wobble
+        p.x += p.vx + Math.sin(p.phase + performance.now() * 0.0005) * 0.15;
+        p.y += p.vy;
+        p.phase += 0.01;
+
+        // Dampen velocity
+        p.vx *= 0.99;
+        p.vy *= 0.99;
+
+        // Wrap around edges
+        if (p.x < -10) p.x = W + 10;
+        if (p.x > W + 10) p.x = -10;
+        if (p.y < -10) p.y = H + 10;
+        if (p.y > H + 10) { p.y = -10; p.x = Math.random() * W; }
+
+        // Draw with parallax offset
+        var py = p.y + sy * p.depth;
+        if (py > H + 20) py -= H + 40;
+        if (py < -20) py += H + 40;
+        ctx.beginPath();
+        ctx.arc(p.x, py, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.color + p.alpha + ')';
+        ctx.fill();
       }
-
-      // Drift + sine wobble
-      p.x += p.vx + Math.sin(p.phase + performance.now() * 0.0005) * 0.15;
-      p.y += p.vy;
-      p.phase += 0.01;
-
-      // Dampen velocity
-      p.vx *= 0.99;
-      p.vy *= 0.99;
-
-      // Wrap around edges
-      if (p.x < -10) p.x = W + 10;
-      if (p.x > W + 10) p.x = -10;
-      if (p.y < -10) p.y = H + 10;
-      if (p.y > H + 10) { p.y = -10; p.x = Math.random() * W; }
-
-      // Draw with parallax offset
-      var py = p.y + sy * p.depth;
-      if (py > H + 20) py -= H + 40;
-      if (py < -20) py += H + 40;
-      ctx.beginPath();
-      ctx.arc(p.x, py, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = p.color + p.alpha + ')';
-      ctx.fill();
     }
     requestAnimationFrame(draw);
   }
@@ -1519,7 +1517,7 @@ document.head.appendChild(style);
   });
 
   // Scroll reveal — fade in only (no transform to avoid conflict with tilt/hover)
-  var revealEls = document.querySelectorAll('.technote-item, .project-card, .skill-group, .wine-compact');
+  var revealEls = document.querySelectorAll('.section-header, .project-card, .wine-mini, .lifestyle-col, .contact-card, .technote-item, .game-chip, .skill-group, .wine-compact');
   var observer = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
       if (entry.isIntersecting) {
@@ -1556,47 +1554,19 @@ document.head.appendChild(style);
     });
   });
 
-  // Section title parallax
+  // Section title parallax (disabled with reduced motion)
   var titles = document.querySelectorAll('.section-title');
-  window.addEventListener('scroll', function() {
-    titles.forEach(function(title) {
-      var rect = title.getBoundingClientRect();
-      var center = rect.top + rect.height / 2;
-      var screenCenter = window.innerHeight / 2;
-      var offset = (center - screenCenter) / screenCenter * 8;
-      title.style.transform = 'translateY(' + offset + 'px)';
-    });
-  }, { passive: true });
-})();
-
-/* ===== SLASH LOADING INTRO ===== */
-(function() {
-  var maskUp = document.getElementById('slashMaskUp');
-  var maskDown = document.getElementById('slashMaskDown');
-  var katana = document.getElementById('slashKatana');
-  var overlay = document.getElementById('slashOverlay');
-  if (!maskUp || !katana) return;
-
-  var tl = gsap.timeline({
-    onUpdate: function() {
-      var r = katana.getBoundingClientRect();
-      var cx = (r.left + r.width) / innerWidth * 100;
-      var cy = (r.top + r.height / 2) / innerHeight * 100;
-      var my = (r.top + r.height / 2) / innerHeight * 100 * 1.2;
-      var dx = r.left / innerWidth * 100;
-      maskUp.style.clipPath = 'polygon(0% 0%, 100% 0%, ' + cx + '% ' + cy + '%, 0% ' + my + '%)';
-      maskDown.style.clipPath = 'polygon(100% 100%, 100% 0%, ' + cx + '% ' + cy + '%, ' + dx + '% 100%)';
-    },
-    onComplete: function() {
-      gsap.to(overlay, { opacity: 0, duration: 0.3, onComplete: function() {
-        overlay.style.display = 'none';
-      }});
-    }
-  });
-  tl.to(katana, { y: function() { return -katana.getBoundingClientRect().height / 2; }, duration: 0.7, ease: 'power3.out' })
-    .to(katana, { y: function() { return -katana.getBoundingClientRect().height / 2 - innerHeight; }, x: function() { return innerWidth; }, duration: 0.6, ease: 'power3.in' }, '<0.5');
-
-  window.addEventListener('resize', function() { if (tl) tl.invalidate(); });
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    window.addEventListener('scroll', function() {
+      titles.forEach(function(title) {
+        var rect = title.getBoundingClientRect();
+        var center = rect.top + rect.height / 2;
+        var screenCenter = window.innerHeight / 2;
+        var offset = (center - screenCenter) / screenCenter * 8;
+        title.style.transform = 'translateY(' + offset + 'px)';
+      });
+    }, { passive: true });
+  }
 })();
 
 /* ===== MAGNETIC CURSOR ===== */
@@ -1609,7 +1579,7 @@ document.head.appendChild(style);
 
   // Elements that attract the cursor
   var magnetic = '.header-nav a, .header-social a, .technote-item, .project-card, ' +
-    '.blog-more-btn, .lang-switch, .wine-shuffle-btn, .scroll-top, .contact-item, .hero-btn, .skill-group';
+    '.blog-more-btn, .lang-switch, .wine-shuffle-btn, .scroll-top, .contact-card, .hero-btn, .skill-group';
 
   // Cross always follows exact mouse position
   window.addEventListener('mousemove', function(e) {

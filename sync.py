@@ -1,31 +1,36 @@
-import re, shutil
+"""Sync local index.html to GitHub Pages static version.
 
-# Copy fresh index.html
-shutil.copy(r"D:\mywebsite-v2\index.html", r"D:\m2niwa-pages\index.html")
+Usage: cd D:/m2niwa-pages && python3 sync.py
 
-with open(r"D:\m2niwa-pages\index.html", 'r', encoding='utf-8') as f:
+Strips dynamic content (dashboard, WebSocket) that GitHub Pages can't serve,
+and copies SEO files (robots.txt / sitemap.xml) alongside.
+"""
+import re, shutil, os
+
+SRC = r"D:\mywebsite-v2\index.html"
+DST = r"D:\m2niwa-pages\index.html"
+
+# Copy fresh
+shutil.copy(SRC, DST)
+
+with open(DST, 'r', encoding='utf-8') as f:
     html = f.read()
 
-# Static cleanup — only what still exists in current version
+# Strip dynamic-only elements
 html = re.sub(r'<!-- ===== FLOATING DASHBOARD ===== -->.*?</aside>', '', html, flags=re.DOTALL)
-html = re.sub(r'<div class="hero-glow hidden" id="heroGlow"></div>\s*\n?', '', html)
-html = html.replace('href="#about"', 'href="#hero"')
-
-# Remove CSS: H5 Trick #1 scroll reveal (dashboard JS CSS)
-html = re.sub(r'/\* ===== H5 TRICK #1: Scroll reveal ===== \*/\n\.reveal[^}]*}\n\.reveal\.visible[^}]*}', '', html)
-
-# Remove JS: FLOATING DASHBOARD JS block
-html = re.sub(r'/\* ===== FLOATING DASHBOARD JS.*?(?=/\* ===== FADE UP ANIMATION)', '', html, flags=re.DOTALL)
-
-# Remove JS: H5 Trick #1 scroll reveal
-html = re.sub(r'/\*\s*\n\s*H5 TRICK #1: Intersection Observer.*?(?=/\*\s*\n\s*H5 TRICK #3)', '', html, flags=re.DOTALL)
-
-# Mobile padding (dashboard)
+html = re.sub(r'/\* ===== FLOATING DASHBOARD SIDEBAR.*?(?=/\* ===== LIFESTYLE MERGED)', '', html, flags=re.DOTALL)
+html = re.sub(r'/\* ===== FLOATING DASHBOARD JS.*?(?=/\* ===== FADE UP)', '', html, flags=re.DOTALL)
+html = re.sub(r'/\* ===== SCROLL WOBBLE.*?(?=/\* ===== FADE UP)', '', html, flags=re.DOTALL)
 html = html.replace('  body { padding-bottom: 56px; }\n', '')
-
-# Clean excess newlines
 html = re.sub(r'\n{3,}', '\n\n', html)
 
-with open(r"D:\m2niwa-pages\index.html", 'w', encoding='utf-8') as f:
+with open(DST, 'w', encoding='utf-8') as f:
     f.write(html)
+
+# Copy SEO files (safe if absent)
+for name in ("robots.txt", "sitemap.xml"):
+    src = os.path.join(os.path.dirname(SRC), name)
+    if os.path.exists(src):
+        shutil.copy(src, os.path.join(os.path.dirname(DST), name))
+
 print(f"Pages static: {len(html)} chars, data-en count: {html.count('data-en=')}")

@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>引力回响 · GRAVITY ECHO</title>
 <style>
   :root{
@@ -284,10 +284,20 @@
   #cursor.press{width:14px;height:14px;margin:-7px 0 0 -7px}
   #cursor.ready{border-color:#7dffe0;box-shadow:0 0 16px rgba(102,247,255,.9)}
   #cursor.danger{border-color:#ff5c8a;box-shadow:0 0 16px rgba(255,60,110,.9)}
+
+  /* ---- 返回主页 ---- */
+  #backHome{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:39;
+    padding:8px 12px;font-size:12px;letter-spacing:.12em;text-decoration:none;
+    color:var(--ink);border:1px solid rgba(120,220,255,.35);border-radius:4px;
+    background:rgba(4,6,16,.5);backdrop-filter:blur(4px);opacity:.55;
+    transition:opacity .2s,border-color .2s}
+  #backHome:hover{opacity:1;border-color:rgba(160,240,255,.9)}
+  @media (max-width:640px){#backHome{top:auto;bottom:14px;transform:none}}
 </style>
 </head>
 <body>
 <canvas id="c"></canvas>
+<a id="backHome" href="/index.html">← M1NIWA</a>
 <div id="scan"></div><div id="vig"></div><div id="danger"></div><div id="slowfx"></div><div id="flash"></div><div id="impact"></div>
 <div id="banner"></div><div id="shout"></div>
 <div id="invert"></div><div id="lbTop"></div><div id="lbBot"></div><div id="bossName"></div>

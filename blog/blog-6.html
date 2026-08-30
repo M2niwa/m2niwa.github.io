@@ -8,15 +8,15 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f1117;
-  --bg-elevated: #1a1d25;
-  --border: rgba(255,255,255,0.06);
+  --bg: #1a1210;
+  --bg-elevated: #241c16;
+  --border: rgba(196,156,88,0.10);
   --border-hover: rgba(255,255,255,0.12);
-  --text: #e4e6eb;
-  --text-secondary: #9ca3af;
-  --text-tertiary: #6b7280;
-  --blue: #3b82f6;
-  --blue-hover: #60a5fa;
+  --text: #efe4cf;
+  --text-secondary: #b8a080;
+  --text-tertiary: #9c8465;
+  --blue: #d4a040;
+  --blue-hover: #e8c060;
   --radius: 10px;
   --radius-sm: 6px;
 }
@@ -39,13 +39,13 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
 
-::selection { background: rgba(59,130,246,0.3); color: #fff; }
+::selection { background: rgba(212,160,64,0.35); color: #fff; }
 
 .blog-container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
 
 .blog-nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(15,17,23,0.85);
+  background: rgba(26,18,16,0.88);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border-bottom: 1px solid var(--border);
@@ -94,14 +94,14 @@ body {
 .article-body strong { color: #fff; font-weight: 600; }
 .article-body a {
   color: var(--blue); text-decoration: none;
-  border-bottom: 1px solid rgba(59,130,246,0.3);
+  border-bottom: 1px solid rgba(212,160,64,0.35);
   transition: border-color 0.2s;
 }
 .article-body a:hover { border-color: var(--blue); }
 .article-body code {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 14px;
-  background: rgba(59,130,246,0.1);
+  background: rgba(212,160,64,0.10);
   color: var(--blue-hover);
   padding: 2px 6px; border-radius: 4px;
 }

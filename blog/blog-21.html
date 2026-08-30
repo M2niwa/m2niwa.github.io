@@ -4,14 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Linux 性能调优笔记：perf、eBPF 与火焰图 — M1NIWA</title>
+<meta name="description" content="服务器性能排查实战：perf 采样、eBPF 动态追踪与火焰图可视化——面对 CPU 飙高与延迟上升时的一套系统化诊断工具链。">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0f1117;--bg-elevated:#1a1d25;--border:rgba(255,255,255,0.06);--text:#e4e6eb;--text-secondary:#9ca3af;--text-tertiary:#6b7280;--blue:#3b82f6;--blue-hover:#60a5fa;--radius:10px;--radius-sm:6px}
+:root{--bg:#1a1210;--bg-elevated:#241c16;--border:rgba(196,156,88,0.10);--text:#efe4cf;--text-secondary:#b8a080;--text-tertiary:#9c8465;--blue:#d4a040;--blue-hover:#e8c060;--radius:10px;--radius-sm:6px}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
-::selection{background:rgba(59,130,246,0.3);color:#fff}
-.blog-nav{position:sticky;top:0;z-index:100;background:rgba(15,17,23,0.85);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--border)}
+::selection{background:rgba(212,160,64,0.35);color:#fff}
+.blog-nav{position:sticky;top:0;z-index:100;background:rgba(26,18,16,0.88);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--border)}
 .blog-nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1100px;margin:0 auto;padding:0 24px}
 .blog-nav-back{font-size:16px;font-weight:600;color:var(--blue);text-decoration:none}
 .blog-nav-back:hover{color:var(--blue-hover)}
@@ -26,7 +27,7 @@ body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background
 .article-body ul,.article-body ol{margin-bottom:20px;padding-left:24px}
 .article-body li{margin-bottom:8px}
 .article-body strong{color:#fff;font-weight:600}
-.article-body code{font-family:'JetBrains Mono',monospace;font-size:14px;background:rgba(59,130,246,0.1);color:var(--blue-hover);padding:2px 6px;border-radius:4px}
+.article-body code{font-family:'JetBrains Mono',monospace;font-size:14px;background:rgba(212,160,64,0.10);color:var(--blue-hover);padding:2px 6px;border-radius:4px}
 .article-body pre{font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;overflow-x:auto;font-size:13px;line-height:1.7;color:var(--text)}
 .article-body pre code{background:none;color:inherit;padding:0;font-size:inherit}
 .blog-footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}

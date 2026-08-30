@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComfyUI 本地部署：国内网络下的镜像源与模型复用 — M1NIWA</title>
+<meta name="description" content="在 RTX 3070 8GB 机器上装 ComfyUI 的踩坑实录：多 Python 环境与 CUDA torch 对齐、torchaudio DLL 兼容、Gitee 镜像与清华源，以及 hf-mirror/ModelScope 下载模型的格式陷阱和秋叶包模型复用。" >
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1210;--bg-elevated:#241c16;--border:rgba(196,156,88,0.10);--text:#efe4cf;--text-secondary:#b8a080;--text-tertiary:#9c8465;--blue:#d4a040;--blue-hover:#e8c060;--radius:10px;--radius-sm:6px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(212,160,64,0.35);color:#fff}
+.blog-nav{position:sticky;top:0;z-index:100;background:rgba(26,18,16,0.88);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--border)}
+.blog-nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1100px;margin:0 auto;padding:0 24px}
+.blog-nav-back{font-size:16px;font-weight:600;color:var(--blue);text-decoration:none}
+.blog-nav-back:hover{color:var(--blue-hover)}
+.blog-nav-title{font-size:14px;color:var(--text-secondary)}
+.blog-container{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+.article-header{margin-bottom:48px;padding-top:24px}
+.article-title{font-size:36px;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:12px;color:var(--text)}
+.article-date{font-size:14px;color:var(--text-tertiary)}
+.article-body{font-size:17px;line-height:1.8}
+.article-body p{margin-bottom:20px}
+.article-body h2{font-size:24px;font-weight:700;margin:48px 0 16px;padding-left:16px;border-left:3px solid var(--blue)}
+.article-body ul,.article-body ol{margin-bottom:20px;padding-left:24px}
+.article-body li{margin-bottom:8px}
+.article-body strong{color:#fff;font-weight:600}
+.article-body a{color:var(--blue)}
+.article-body code{font-family:'JetBrains Mono',monospace;font-size:14px;background:rgba(212,160,64,0.10);color:var(--blue-hover);padding:2px 6px;border-radius:4px}
+.article-body pre{font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;overflow-x:auto;font-size:13px;line-height:1.7;color:var(--text)}
+.article-body pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.blog-footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}
+.blog-footer p{font-size:13px;color:var(--text-tertiary)}
+.blog-footer a{color:var(--text-secondary);text-decoration:none}
+.blog-footer a:hover{color:var(--blue)}
+</style>
+</head>
+<body>
+<nav class="blog-nav"><div class="blog-nav-inner"><a href="/index.html" class="blog-nav-back">← M1NIWA</a><span class="blog-nav-title">ComfyUI 国内部署</span></div></nav>
+<div class="blog-container">
+<header class="article-header"><h1 class="article-title">ComfyUI 本地部署：国内网络下的镜像源与模型复用</h1><p class="article-date">2025-07-08</p></header>
+<article class="article-body">
+<p>为了给游戏美术管线做本地图像生成，我在一台 Windows 11 + RTX 3070 8GB 的机器上装 ComfyUI。安装本身不复杂，但「包下载」「模型下载」和「模型格式」三件事在国内网络下各有各的坑，这里按踩坑顺序记录。</p>
+
+<h2>先对齐 Python 与 CUDA，再谈安装</h2>
+<p>机器上不止一个 Python：Windows Store 的 <code>python3</code> 和 Anaconda 各有一份，前者带着 CUDA 版 torch 2.6.0+cu124，后者是 CPU-only 的 torch 2.9.0。装完 raise 的一瞬间就真会问「为什么没有 GPU」，所以第一步永远是：</p>
+<pre><code>python3 -c "import torch; print(torch.cuda.is_available())"
+# 务必输出 True 再往下走</code></pre>
+<p>接着是 torchaudio 的 DLL 兼容问题——Windows Store Python 的 torchaudio 2.11.0 加载 DLL 直接报 WinError 127。解决方式是让 torchaudio 与 torch 版本对齐到同一套 CUDA 轮子：</p>
+<pre><code>python3 -m pip install torchaudio==2.6.0+cu124 \
+  --index-url https://pypi.tuna.tsinghua.edu.cn/simple \
+  --extra-index-url https://download.pytorch.org/whl/cu124</code></pre>
+<p>仓库用 GitHub 直接克隆会超时，换 Gitee 的 ComfyUI 镜像做浅克隆即可：<code>git clone --depth 1 https://gitee.com/mirrors/ComfyUI.git</code>。装完依赖 <code>python3 main.py --listen 0.0.0.0 --port 8188</code> 启动，第一次会下载前端资源包，等 30 秒左右再用 <code>curl -s http://127.0.0.1:8188/</code> 验证。</p>
+
+<h2>模型不是下载慢，而是格式不对</h2>
+<p>最耗时间的一环其实在模型。hf-mirror.com 能访问，但实测只有 165KB/s，4GB 的模型要下载七个钟头，直接放弃。ModelScope 的 <code>snapshot_download</code> 快是快，可拉下来的是 Diffusers 多文件格式（多个文件夹），ComfyUI 需要的是单文件 <code>.safetensors</code> checkpoint，格式对不上；openxlab 则需要账号密钥登录。</p>
+<p>最终的可行方案分两条：一是浏览器直接开 <code>hf-mirror.com</code> 手动下载 .safetensors 放 <code>models/checkpoints/</code>；二是如果手上已经有秋叶 WebUI Forge 整合包（我那台机器 D 盘就有 <code>sd-forge-aki</code>），直接 <code>cp</code> 复用模型，零下载：</p>
+<pre><code># checkpoint → models/checkpoints/，text encoder → models/clip/，VAE → models/vae/
+# 注意：Flux 的 unet 必须放 models/unet/，放 checkpoints 里不会被识别
+cp /d/Documents/sd-forge-aki/.../models/Stable-diffusion/*.safetensors \
+   /d/comfy/ComfyUI/models/checkpoints/
+mv /d/comfy/ComfyUI/models/checkpoints/flux1-dev-bnb-nf4-v2.safetensors \
+   /d/comfy/ComfyUI/models/unet/</code></pre>
+<p>8GB 显存下 nf4 量化的 Flux dev 能稳定跑 20 步，动漫向用 Animagine XL 4.0 fp8。装完之后回头看，唯一的「硬知识」其实只有两条：torch 的 CUDA 版本必须全链对齐，以及 ComfyUI 对模型目录有严格要求——其余时间都花在等下载上了。</p>
+<p style="color:var(--text-tertiary);font-size:13px">--- 约 780 字</p>
+</article>
+</div>
+<footer class="blog-footer"><p>© 2026 M1NIWA · <a href="/index.html">返回首页</a> · <a href="/blog/index.html">全部文章</a></p></footer>
+</body>
+</html>

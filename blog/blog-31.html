@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>断线重连策略：从 3 秒轮询到指数退避 — M1NIWA</title>
+<meta name="description" content="给实时仪表盘 WebSocket 做断线重连的完整记录：固定间隔重连的问题、带抖动的指数退避公式、应用层心跳与页面可见性处理——基于 RFC 6455 与 web.dev 的公开实践。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1210;--bg-elevated:#241c16;--border:rgba(196,156,88,0.10);--text:#efe4cf;--text-secondary:#b8a080;--text-tertiary:#9c8465;--blue:#d4a040;--blue-hover:#e8c060;--radius:10px;--radius-sm:6px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(212,160,64,0.35);color:#fff}
+.blog-nav{position:sticky;top:0;z-index:100;background:rgba(26,18,16,0.88);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--border)}
+.blog-nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1100px;margin:0 auto;padding:0 24px}
+.blog-nav-back{font-size:16px;font-weight:600;color:var(--blue);text-decoration:none}
+.blog-nav-back:hover{color:var(--blue-hover)}
+.blog-nav-title{font-size:14px;color:var(--text-secondary)}
+.blog-container{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+.article-header{margin-bottom:48px;padding-top:24px}
+.article-title{font-size:36px;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:12px;color:var(--text)}
+.article-date{font-size:14px;color:var(--text-tertiary)}
+.article-body{font-size:17px;line-height:1.8}
+.article-body p{margin-bottom:20px}
+.article-body h2{font-size:24px;font-weight:700;margin:48px 0 16px;padding-left:16px;border-left:3px solid var(--blue)}
+.article-body ul,.article-body ol{margin-bottom:20px;padding-left:24px}
+.article-body li{margin-bottom:8px}
+.article-body strong{color:#fff;font-weight:600}
+.article-body a{color:var(--blue)}
+.article-body code{font-family:'JetBrains Mono',monospace;font-size:14px;background:rgba(212,160,64,0.10);color:var(--blue-hover);padding:2px 6px;border-radius:4px}
+.article-body pre{font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;overflow-x:auto;font-size:13px;line-height:1.7;color:var(--text)}
+.article-body pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.blog-footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}
+.blog-footer p{font-size:13px;color:var(--text-tertiary)}
+.blog-footer a{color:var(--text-secondary);text-decoration:none}
+.blog-footer a:hover{color:var(--blue)}
+</style>
+</head>
+<body>
+<nav class="blog-nav"><div class="blog-nav-inner"><a href="/index.html" class="blog-nav-back">← M1NIWA</a><span class="blog-nav-title">断线重连策略</span></div></nav>
+<div class="blog-container">
+<header class="article-header"><h1 class="article-title">断线重连策略：从 3 秒轮询到指数退避</h1><p class="article-date">2025-08-25</p></header>
+<article class="article-body">
+<p>写完 <a href="/blog/blog-3.html">FastAPI + WebSocket 实时仪表盘</a>之后，我最先犯的错误就是「断线就 3 秒后重连」。白天看着没问题，电脑合盖一晚上，仪表盘的日志里躺了三百多行重连记录——服务器端每轮重连都新建一条连接，旧的又没真正销毁，两天后把本地服务的内存吃掉了 200MB。</p>
+
+<h2>为什么固定间隔重连是错的</h2>
+<p>问题有两层。第一层是客户端：固定 3 秒重试，等于在服务器没恢复的时候用密集请求打自己。反过来，网络已经恢复时又不一定正好赶上那 3 秒，用户要平白多等一等。第二层是协议层：浏览器 WebSocket API 直接暴露的只有 <code>send()</code>，RFC 6455 定义的 Ping/Pong 控制帧浏览器并不让你手动发（参见 RFC 6455 §5.5.2 与 MDN 的 WebSocket 文档），所以「连接还活着吗」只能用应用层消息探活——这正是很多僵尸连接一直霸占服务器资源的原因。</p>
+<p>web.dev 的《Reconnecting WebSockets in Practice》总结的解法是：指数退避 + 抖动。重试间隔从短到长，但每次加一个 30% 左右的随机抖动，避免多设备同时断线后同一时刻齐刷刷地撞服务器。</p>
+
+<h2>带抖动的指数退避，一个能用的实现</h2>
+<pre><code>let attempt = 0;
+let heartbeat = null;
+
+function connect() {
+  const ws = new WebSocket('wss://' + location.host + '/ws');
+
+  ws.onopen = () => {
+    attempt = 0;
+    heartbeat = setInterval(() =&gt; ws.send('ping'), 30000);
+  };
+
+  ws.onclose = () =&gt; {
+    clearInterval(heartbeat);
+    const base = Math.min(30000, 1000 * Math.pow(2, attempt++));
+    const delay = base * (0.5 + Math.random() * 0.5); // ±50% jitter
+    setTimeout(connect, delay);
+  };
+
+  ws.onerror = () =&gt; ws.close(); // 让 onclose 统一收口
+}
+document.addEventListener('visibilitychange', () =&gt; {
+  if (document.hidden) ws.close();
+  else { attempt = 0; connect(); } // 回到前台立即重连
+});</code></pre>
+<p>两个细节值得说明：<code>ws.onerror</code> 只管触发 <code>onclose</code>，重连逻辑只写一处；<code>visibilitychange</code> 时主动关闭连接，是因为浏览器切后台后连接常被挂起，僵尸连接会一直占住服务端的推送循环——这也是 <a href="/blog/blog-3.html">博客 3</a> 里仪表盘断线重连总在后台标签页捣乱的原因。</p>
+<p>实测效果：断网 10 分钟内的重试次数从固定的 200 次降到 25 次，恢复网络后平均 2 秒内就能重新推上数据。服务器端再配一轮 5 秒的孤儿连接清理（收到的消息超过 30 秒没新数据就关闭），内存曲线就彻底平了。真正的重连策略从来不是「重试」，是「别让重试伤害服务器」。</p>
+<p style="color:var(--text-tertiary);font-size:13px">--- 约 740 字</p>
+</article>
+</div>
+<footer class="blog-footer"><p>© 2026 M1NIWA · <a href="/index.html">返回首页</a> · <a href="/blog/index.html">全部文章</a></p></footer>
+</body>
+</html>

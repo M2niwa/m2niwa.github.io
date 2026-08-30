@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人站上 Cloudflare Pages：网络路径与 SPA 回退配置 — M1NIWA</title>
+<meta name="description" content="把个人站从 GitHub Pages 迁移到 Cloudflare Pages 的网络观察：Git 集成自动构建、全球任意播 CDN 与大陆访问的差异，以及 _redirects/_headers 里值得抄的两条静态站配置。">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1210;--bg-elevated:#241c16;--border:rgba(196,156,88,0.10);--text:#efe4cf;--text-secondary:#b8a080;--text-tertiary:#9c8465;--blue:#d4a040;--blue-hover:#e8c060;--radius:10px;--radius-sm:6px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.65;-webkit-font-smoothing:antialiased}
+::selection{background:rgba(212,160,64,0.35);color:#fff}
+.blog-nav{position:sticky;top:0;z-index:100;background:rgba(26,18,16,0.88);backdrop-filter:blur(16px) saturate(180%);border-bottom:1px solid var(--border)}
+.blog-nav-inner{display:flex;align-items:center;justify-content:space-between;height:64px;max-width:1100px;margin:0 auto;padding:0 24px}
+.blog-nav-back{font-size:16px;font-weight:600;color:var(--blue);text-decoration:none}
+.blog-nav-back:hover{color:var(--blue-hover)}
+.blog-nav-title{font-size:14px;color:var(--text-secondary)}
+.blog-container{max-width:720px;margin:0 auto;padding:48px 24px 80px}
+.article-header{margin-bottom:48px;padding-top:24px}
+.article-title{font-size:36px;font-weight:700;letter-spacing:-0.03em;line-height:1.2;margin-bottom:12px;color:var(--text)}
+.article-date{font-size:14px;color:var(--text-tertiary)}
+.article-body{font-size:17px;line-height:1.8}
+.article-body p{margin-bottom:20px}
+.article-body h2{font-size:24px;font-weight:700;margin:48px 0 16px;padding-left:16px;border-left:3px solid var(--blue)}
+.article-body ul,.article-body ol{margin-bottom:20px;padding-left:24px}
+.article-body li{margin-bottom:8px}
+.article-body strong{color:#fff;font-weight:600}
+.article-body a{color:var(--blue)}
+.article-body code{font-family:'JetBrains Mono',monospace;font-size:14px;background:rgba(212,160,64,0.10);color:var(--blue-hover);padding:2px 6px;border-radius:4px}
+.article-body pre{font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-bottom:24px;overflow-x:auto;font-size:13px;line-height:1.7;color:var(--text)}
+.article-body pre code{background:none;color:inherit;padding:0;font-size:inherit}
+.blog-footer{border-top:1px solid var(--border);padding:32px 0;text-align:center}
+.blog-footer p{font-size:13px;color:var(--text-tertiary)}
+.blog-footer a{color:var(--text-secondary);text-decoration:none}
+.blog-footer a:hover{color:var(--blue)}
+</style>
+</head>
+<body>
+<nav class="blog-nav"><div class="blog-nav-inner"><a href="/index.html" class="blog-nav-back">← M1NIWA</a><span class="blog-nav-title">Cloudflare Pages 网络观察</span></div></nav>
+<div class="blog-container">
+<header class="article-header"><h1 class="article-title">个人站上 Cloudflare Pages：网络路径与 SPA 回退配置</h1><p class="article-date">2026-04-08</p></header>
+<article class="article-body">
+<p>这个站的部署史是一条清晰的时间线：最开始按<a href="/blog/blog-25.html">建站记</a>里的方案跑在本机 Windows + Uvicorn 上，然后推到 GitHub Pages 走国外访问，最后把主站钉在 Cloudflare Pages 上作为国内可达的入口。这次迁移让我把「静态站托管」背后的网络路径真正看清楚了。</p>
+
+<h2>Git 集成与全球网络</h2>
+<p>Cloudflare Pages 的部署方式是连接 Git 仓库主干分支，代码一推就自动构建，构建配置留空就行——我连 API Token 都没生成过，因为根本用不到（Cloudflare 文档称这套为「Framework guides + Git integration」，Pages 托管在其全球网络上）。真正的差别在网络层：Cloudflare 用 Anycast 把每个访客路由到最近的边缘节点，静态资源在你眼皮底下命中缓存；但免费版没有中国内地节点，从大陆访问会绕行境外线路，速度波动比我预想的大，高峰时段甚至不如直连 GitHub Pages 稳定。好处是它不经过需备案的境内线路，作为个人站合规成本为零。</p>
+<p>所以最终布局是两个域名并行：GitHub Pages 作为国外镜像，Cloudflare Pages 作为主站，DNS 都指向 <code>m2niwa.pages.dev</code>——结构上只多一个同构仓库，收益是大陆与海外都有了稳定的入口。</p>
+
+<h2>两条值得抄进仓库的配置</h2>
+<p>Pages 的根目录放 <code>_redirects</code> 和 <code>_headers</code> 两个文件就能声明回退与缓存策略。个人单页站最有用的是 SPA 回退：</p>
+<pre><code># _redirects —— 未知路径回退到首页（SPA 路由）
+/*  /index.html  200
+
+# _headers —— 静态资源和 PDF 长缓存
+/blog/*
+  Cache-Control: public, max-age=86400
+/*.pdf
+  Cache-Control: public, max-age=604800</code></pre>
+<p>第一条把任意未知路径 200 回退到主索引，第二条看着不起眼，但 8MB 的作品集 PDF 全靠它避免每次访问都全量重下——效果等同于本文的<a href="/blog/blog-31.html">断线重连策略</a>那篇文章里说的「不要让重复请求伤害别人」。另外提一句：Pages 的 404 页可以自定义，配一个 <code>/404.html</code> 会让 SEO 体检报告干净很多，这个比追着改路由有效得多。</p>
+<p>回头看我唯一的失误是低估了「多站点认知成本」：GitHub Pages、Cloudflare Pages 和本地版三处同构，任何一处忘同步都会出现「改了本地，线上没变」的灵异现象。所以现在我把兼容脚本放进了仓库根目录，每次发布跑一遍，网络路径的事就交给边缘节点了。</p>
+<p style="color:var(--text-tertiary);font-size:13px">--- 约 760 字</p>
+</article>
+</div>
+<footer class="blog-footer"><p>© 2026 M1NIWA · <a href="/index.html">返回首页</a> · <a href="/blog/index.html">全部文章</a></p></footer>
+</body>
+</html>
