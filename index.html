@@ -1267,9 +1267,9 @@ const TYPE_BY_EMOJI = { '🥃': 'whisky', '🍺': 'beer', '🍶': 'sake', '🍸'
 
 /* Wine card photos: real bottle/glass shots from Wikimedia Commons (free licenses,
    attribution in assets/wines/CREDITS.md). Falls back to a type image by emoji. */
-const WINE_IMG = ['kavalan','talisker10','botanist','akashi','yumeno-kankobai','ise-kadoya-ipa','haihe-gose','deepthroat-ipa','citra-overlord-ipa','tiaodonghu-ipa','baihua-shendu-ipa','monkey-fist-ipa','glenlivet12','100-years-solitude','jw-black','jameson','rokudaime-yuri','chichibu-hyakka','coedo-ruri','punk-ipa'];
-wines.forEach((w, i) => { w.img = WINE_IMG[i] || TYPE_BY_EMOJI[w.emoji] || 'whisky'; });
-winesEn.forEach((w, i) => { w.img = WINE_IMG[i] || TYPE_BY_EMOJI[w.emoji] || 'whisky'; });
+const WINE_IMG = ['kavalan','talisker10','botanist','akashi','yumeno-kankobai','ise-kadoya-ipa','haihe-gose','','','tiaodonghu-ipa','','monkey-fist-ipa','glenlivet12','','jw-black','jameson','rokudaime-yuri','chichibu-hyakka','coedo-ruri','punk-ipa'];
+wines.forEach((w, i) => { w.img = WINE_IMG[i] || ''; });
+winesEn.forEach((w, i) => { w.img = WINE_IMG[i] || ''; });
 
 function renderWines(items) {
   const container = document.getElementById('wineCompact');
@@ -1278,7 +1278,7 @@ function renderWines(items) {
   container.innerHTML = show.map(w => `
     <div class="wine-mini">
       <span class="wm-type">${w.emoji}</span>
-      <div class="wm-art"><img src="/assets/wines/${w.img}.jpg" alt="" loading="lazy" decoding="async"></div>
+      ${w.img ? `<div class="wm-art"><img src="/assets/wines/${w.img}.jpg" alt="" loading="lazy" decoding="async"></div>` : ''}
       <div class="wm-name">${w.name}</div>
       <div class="wm-notes">${w.notes}</div>
     </div>
