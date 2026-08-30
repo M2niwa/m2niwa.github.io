@@ -763,7 +763,7 @@ body { cursor: none; }
 }
 @media (hover: none), (pointer: coarse) { .mag-pointer, .mag-cross { display: none; } body { cursor: auto; } }
 
-/* ===== SLASH LOADING INTRO (JS-driven, no dependency) ===== */
+/* ===== SLASH LOADING INTRO (original geometry, JS-driven — no GSAP) ===== */
 .slash-overlay {
   position: fixed; inset: 0; z-index: 10000;
   pointer-events: none;
@@ -772,55 +772,26 @@ body { cursor: none; }
   animation: slashFallbackHide 0.2s ease-out 3.6s forwards;
 }
 @keyframes slashFallbackHide { to { opacity: 0; visibility: hidden; } }
-/* Amber bloom pulse during the slash */
-.slash-flash {
-  position: absolute; inset: 0; z-index: 5;
-  background:
-    radial-gradient(ellipse at 72% 45%, rgba(255,236,180,0.55) 0%, rgba(232,200,96,0.18) 40%, transparent 65%);
-  opacity: 0;
-  will-change: opacity;
-}
-/* Warm exposure washing over the revealed page after the cut */
-.slash-wash {
-  position: absolute; inset: 0; z-index: 3;
-  background:
-    radial-gradient(ellipse at 64% 44%, rgba(255,224,150,0.22) 0%, rgba(212,160,64,0.10) 42%, transparent 64%);
-  opacity: 0;
-  will-change: opacity;
-}
-/* Glowing cut edges that follow the blade tip */
-.slash-edge {
-  position: absolute; left: 0; top: 0; height: 3px;
-  transform-origin: 0 50%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, rgba(255,233,176,0) 0%, #ffe9b0 72%, #f0d080 100%);
-  box-shadow: 0 0 14px rgba(255,224,150,0.85), 0 0 34px rgba(232,200,96,0.45);
-  opacity: 0;
-  will-change: transform, opacity;
+.slash-bg {
+  position: absolute; inset: 0;
+  background: #d4a040;
 }
 .slash-katana {
-  position: absolute; left: 0; top: 100%;
-  width: 9vh; height: auto; /* JS 每帧按视口重算：整刀可见 */
+  position: absolute; left: 0; top: 100%; z-index: 2;
+  width: 30vmin; height: auto;
   will-change: transform;
-  filter: drop-shadow(0 0 16px rgba(232,200,96,0.65)) drop-shadow(0 0 52px rgba(255,224,140,0.30));
 }
-.slash-katana path { fill: #f6ecd2; }
-.slash-katana path + path { fill: #c9a050; }
-.slash-glint {
-  position: absolute; left: 0; top: 0; width: 2px; height: 78vh;
-  background: linear-gradient(180deg, transparent, rgba(255,244,214,0.95) 50%, transparent);
-  opacity: 0; will-change: transform, opacity;
-  transform: rotate(16deg);
-}
+.slash-katana path { fill: #e4e6eb; }
+.slash-katana path + path { fill: #9ca3af; }
 .slash-mask {
   position: absolute; width: 100%; height: 100%; z-index: 1;
-  background: #241c16; /* one step lighter than the page → the cut is visible */
+  background: var(--bg);
 }
 .slash-mask-up {
   clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
 }
 .slash-mask-down {
-  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+  clip-path: polygon(100% 100%, 100% 0%, 100% 100%, 100% 100%);
 }
 @media (prefers-reduced-motion: reduce) {
   .slash-overlay { display: none; }
@@ -836,15 +807,11 @@ body { cursor: none; }
 
 <!-- ===== SLASH LOADING INTRO ===== -->
 <div class="slash-overlay" id="slashOverlay" aria-hidden="true">
+  <div class="slash-bg"></div>
   <svg class="slash-katana" id="slashKatana" viewBox="0 0 68.49 760">
     <path d="M26.03,760H0C20.47,552.92,26.96,357.12,21.24,185.46h0C19.06,119.86,15.09,57.81,9.44,0c7.79,6.36,14.78,13.62,20.84,21.6,4.54,43.21,8.12,88.85,10.69,136.61h0c9.52,176.77,5.29,382.63-14.94,601.79Z"/>
     <path d="M68.49,384.66c0,117.73-5.36,244.02-16.6,375.34H26.03c20.23-219.16,24.46-425.02,14.94-601.78h0c-2.57-47.77-6.15-93.41-10.69-136.62,13.66,18.01,22.54,39.66,25.05,62.92.08.75.16,1.5.22,2.26,8.49,90.41,12.94,190.6,12.94,297.88Z"/>
   </svg>
-  <div class="slash-glint" id="slashGlint"></div>
-  <div class="slash-flash" id="slashFlash"></div>
-  <div class="slash-wash" id="slashWash"></div>
-  <div class="slash-edge" id="slashEdgeA"></div>
-  <div class="slash-edge" id="slashEdgeB"></div>
   <div class="slash-mask slash-mask-up" id="slashMaskUp"></div>
   <div class="slash-mask slash-mask-down" id="slashMaskDown"></div>
 </div>
@@ -1353,18 +1320,13 @@ const style = document.createElement('style');
 style.textContent = '@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }';
 document.head.appendChild(style);
 
-/* ===== SLASH LOADING INTRO — rAF-driven, zero dependencies ===== */
+/* ===== SLASH LOADING INTRO — original timeline, reproduced without GSAP ===== */
 (function() {
   const overlay = document.getElementById('slashOverlay');
   const katana = document.getElementById('slashKatana');
   const maskUp = document.getElementById('slashMaskUp');
   const maskDown = document.getElementById('slashMaskDown');
-  const glint = document.getElementById('slashGlint');
-  const flash = document.getElementById('slashFlash');
-  const wash = document.getElementById('slashWash');
-  const edgeA = document.getElementById('slashEdgeA');
-  const edgeB = document.getElementById('slashEdgeB');
-  if (!overlay || !katana || !maskUp || !maskDown || !flash || !wash || !edgeA || !edgeB) return;
+  if (!overlay || !katana || !maskUp || !maskDown) return;
 
   let done = false;
   function hide() {
@@ -1378,68 +1340,46 @@ document.head.appendChild(style);
     hide();
     return;
   }
-  setTimeout(hide, 4000);
+  setTimeout(hide, 4200);
 
-  const T_RISE = 320, T_SLASH = 1000, T_FADE = 280;
+  // Original GSAP timeline, reproduced 1:1 (no GSAP dependency):
+  //   rise:  y → -h/2, 0.7s, power3.out
+  //   slash: starts at 0.2s, y → -h/2 - innerHeight, x → innerWidth, 0.6s, power3.in
+  //   fade:  overlay opacity → 0, 0.3s  (total ≈ 1.1s)
+  const T_RISE = 700, T_SLASH_START = 200, T_SLASH = 600, T_TOTAL = 1100;
+  const power3Out = t => 1 - Math.pow(1 - t, 3);
+  const power3In = t => t * t * t;
   const t0 = performance.now();
-  const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
-  const easeInCubic = t => t * t * t;
+  let ySlashStart = null;
 
   function frame(now) {
     if (done) return;
     const el = now - t0;
     const vw = innerWidth, vh = innerHeight;
-    // Whole blade visible: height ≈ viewport, width from the SVG aspect (68.49:760)
-    const w = Math.max(56, vh * 0.09);
+    const w = 0.30 * Math.min(vw, vh);
     const h = w * (760 / 68.49);
-    katana.style.width = w + 'px';
 
-    if (el < T_RISE) {
-      // Tip glides up from the bottom edge to 25% viewport height, centered
-      const k = easeOutCubic(el / T_RISE);
-      katana.style.transform = 'translate3d(' + ((vw - w) / 2) + 'px,' + (-k * vh * 0.75) + 'px,0)';
-    } else if (el < T_RISE + T_SLASH) {
-      const k = easeInCubic((el - T_RISE) / T_SLASH);
-      const dxStart = (vw - w) / 2;
-      const dxEnd = vw + w * 0.1; // blade fully exits the right edge
-      const x = dxStart + k * (dxEnd - dxStart);
-      // Tip sweeps diagonally down-right, THROUGH the screen center (25% → 75% height)
-      const y = -vh * 0.75 + k * vh * 0.5;
+    if (el < T_SLASH_START) {
+      const y = -h / 2 * power3Out(Math.min(el / T_RISE, 1));
+      katana.style.transform = 'translate3d(0px,' + y + 'px,0)';
+      if (ySlashStart === null) ySlashStart = y;
+    } else if (el < T_SLASH_START + T_SLASH) {
+      if (ySlashStart === null) ySlashStart = -h / 2 * power3Out(T_SLASH_START / T_RISE);
+      const p = power3In((el - T_SLASH_START) / T_SLASH);
+      const y = ySlashStart + ((-h / 2 - vh) - ySlashStart) * p;
+      const x = p * vw;
       katana.style.transform = 'translate3d(' + x + 'px,' + y + 'px,0)';
-      // Cut point = the blade TIP (top of the SVG), not the rect center
-      const tipX = x + w * 0.4;
-      const tipY = y;
-      const cx = Math.min(tipX / vw * 100, 105);
-      const cy = tipY / vh * 100;
-      const my = Math.min(Math.max(cy * 1.3, 12), 100);
-      const dxp = Math.min(Math.max(x / vw * 100, 0), 100);
+      // clip-path polygons track the blade rect (original logic)
+      const r = katana.getBoundingClientRect();
+      const cx = (r.left + r.width / 2) / vw * 100;
+      const cy = (r.top + r.height / 2) / vh * 100;
+      const my = cy * 1.2;
+      const dx = r.left / vw * 100;
       maskUp.style.clipPath = 'polygon(0% 0%, 100% 0%, ' + cx + '% ' + cy + '%, 0% ' + my + '%)';
-      maskDown.style.clipPath = 'polygon(100% 100%, 100% 0%, ' + cx + '% ' + cy + '%, ' + dxp + '% 100%)';
-      // Blade glint + amber bloom + glowing cut edges + light wash over the page
-      const pk = (el - T_RISE) / T_SLASH;
-      const glow = Math.sin(pk * Math.PI) * 0.9;
-      const aY = my / 100 * vh;
-      const bX = dxp / 100 * vw;
-      const edges = [[edgeA, 0, aY], [edgeB, bX, vh]];
-      for (let e = 0; e < edges.length; e++) {
-        const edge = edges[e][0], ex = edges[e][1], ey = edges[e][2];
-        const ddx = ex - tipX, ddy = ey - tipY;
-        edge.style.width = Math.hypot(ddx, ddy) + 'px';
-        edge.style.transform = 'translate(' + tipX + 'px,' + tipY + 'px) rotate(' + (Math.atan2(ddy, ddx) * 180 / Math.PI) + 'deg)';
-        edge.style.opacity = String(glow);
-      }
-      glint.style.opacity = String(glow);
-      glint.style.transform = 'translate3d(' + tipX + 'px,' + (tipY + h * 0.06) + 'px,0) rotate(16deg)';
-      flash.style.opacity = String(Math.sin(pk * Math.PI) * 0.5);
-      wash.style.opacity = String(Math.sin(pk * Math.PI) * 0.4);
-    } else if (el < T_RISE + T_SLASH + T_FADE) {
-      // Page is fully visible through the cut; light, edges and blade settle away
-      const k = (el - T_RISE - T_SLASH) / T_FADE;
-      flash.style.opacity = String(0.5 * (1 - k));
-      wash.style.opacity = String(0.4 * (1 - k));
-      glint.style.opacity = String(0.9 * (1 - k));
-      edgeA.style.opacity = String(0.9 * (1 - k));
-      edgeB.style.opacity = String(0.9 * (1 - k));
+      maskDown.style.clipPath = 'polygon(100% 100%, 100% 0%, ' + cx + '% ' + cy + '%, ' + dx + '% 100%)';
+    } else if (el < T_TOTAL) {
+      const k = (el - T_SLASH_START - T_SLASH) / 300;
+      overlay.style.opacity = String(1 - k);
     } else {
       hide();
       return;
