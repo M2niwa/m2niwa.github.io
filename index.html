@@ -769,25 +769,43 @@ body { cursor: none; }
   pointer-events: none;
   overflow: hidden;
   /* Pure-CSS watchdog: even if JS dies, the intro can never trap the page */
-  animation: slashFallbackHide 0.2s ease-out 2.6s forwards;
+  animation: slashFallbackHide 0.2s ease-out 3.6s forwards;
 }
 @keyframes slashFallbackHide { to { opacity: 0; visibility: hidden; } }
-/* Slash flash: brief amber bloom sweeping with the cut */
+/* Amber bloom pulse during the slash */
 .slash-flash {
-  position: absolute; inset: 0; z-index: 3;
+  position: absolute; inset: 0; z-index: 5;
   background:
     radial-gradient(ellipse at 72% 45%, rgba(255,236,180,0.55) 0%, rgba(232,200,96,0.18) 40%, transparent 65%);
   opacity: 0;
   will-change: opacity;
 }
+/* Warm exposure washing over the revealed page after the cut */
+.slash-wash {
+  position: absolute; inset: 0; z-index: 3;
+  background:
+    radial-gradient(ellipse at 68% 42%, rgba(255,224,150,0.30) 0%, rgba(212,160,64,0.14) 45%, transparent 72%);
+  opacity: 0;
+  will-change: opacity;
+}
+/* Glowing cut edges that follow the blade tip */
+.slash-edge {
+  position: absolute; left: 0; top: 0; height: 3px;
+  transform-origin: 0 50%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(255,233,176,0) 0%, #ffe9b0 72%, #f0d080 100%);
+  box-shadow: 0 0 14px rgba(255,224,150,0.85), 0 0 34px rgba(232,200,96,0.45);
+  opacity: 0;
+  will-change: transform, opacity;
+}
 .slash-katana {
   position: absolute; left: 0; top: 100%;
-  width: 26vmin; height: auto;
+  width: 34vmin; height: auto;
   will-change: transform;
-  filter: drop-shadow(0 0 14px rgba(232,200,96,0.55)) drop-shadow(0 0 42px rgba(255,224,140,0.25));
+  filter: drop-shadow(0 0 16px rgba(232,200,96,0.65)) drop-shadow(0 0 52px rgba(255,224,140,0.30));
 }
-.slash-katana path { fill: #f2e3bd; }
-.slash-katana path + path { fill: #b8924a; }
+.slash-katana path { fill: #f6ecd2; }
+.slash-katana path + path { fill: #c9a050; }
 .slash-glint {
   position: absolute; left: 0; top: 0; width: 2px; height: 78vh;
   background: linear-gradient(180deg, transparent, rgba(255,244,214,0.95) 50%, transparent);
@@ -796,7 +814,7 @@ body { cursor: none; }
 }
 .slash-mask {
   position: absolute; width: 100%; height: 100%; z-index: 1;
-  background: var(--bg);
+  background: #241c16; /* one step lighter than the page → the cut is visible */
 }
 .slash-mask-up {
   clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
@@ -824,6 +842,9 @@ body { cursor: none; }
   </svg>
   <div class="slash-glint" id="slashGlint"></div>
   <div class="slash-flash" id="slashFlash"></div>
+  <div class="slash-wash" id="slashWash"></div>
+  <div class="slash-edge" id="slashEdgeA"></div>
+  <div class="slash-edge" id="slashEdgeB"></div>
   <div class="slash-mask slash-mask-up" id="slashMaskUp"></div>
   <div class="slash-mask slash-mask-down" id="slashMaskDown"></div>
 </div>
@@ -1340,7 +1361,10 @@ document.head.appendChild(style);
   const maskDown = document.getElementById('slashMaskDown');
   const glint = document.getElementById('slashGlint');
   const flash = document.getElementById('slashFlash');
-  if (!overlay || !katana || !maskUp || !maskDown || !flash) return;
+  const wash = document.getElementById('slashWash');
+  const edgeA = document.getElementById('slashEdgeA');
+  const edgeB = document.getElementById('slashEdgeB');
+  if (!overlay || !katana || !maskUp || !maskDown || !flash || !wash || !edgeA || !edgeB) return;
 
   let done = false;
   function hide() {
@@ -1354,9 +1378,9 @@ document.head.appendChild(style);
     hide();
     return;
   }
-  setTimeout(hide, 3200);
+  setTimeout(hide, 4200);
 
-  const T_RISE = 420, T_SLASH = 700, T_FADE = 240;
+  const T_RISE = 600, T_SLASH = 1100, T_FADE = 320;
   const t0 = performance.now();
   const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
   const easeInCubic = t => t * t * t;
@@ -1384,15 +1408,32 @@ document.head.appendChild(style);
       const dxp = Math.max(0, r.left / vw * 100);
       maskUp.style.clipPath = 'polygon(0% 0%, 100% 0%, ' + cx + '% ' + cy + '%, 0% ' + my + '%)';
       maskDown.style.clipPath = 'polygon(100% 100%, 100% 0%, ' + cx + '% ' + cy + '%, ' + dxp + '% 100%)';
-      // Blade glint + amber bloom sweep with the cut
+      // Blade glint + amber bloom + glowing cut edges + light wash over the page
       const pk = (el - T_RISE) / T_SLASH;
-      glint.style.opacity = String(Math.sin(pk * Math.PI) * 0.9);
+      const glow = Math.sin(pk * Math.PI) * 0.9;
+      const tipX = r.left + r.width / 2, tipY = r.top + r.height / 2;
+      const aY = my / 100 * vh;
+      const bX = dxp / 100 * vw;
+      const edges = [[edgeA, 0, aY], [edgeB, bX, vh]];
+      for (let e = 0; e < edges.length; e++) {
+        const edge = edges[e][0], ex = edges[e][1], ey = edges[e][2];
+        const ddx = ex - tipX, ddy = ey - tipY;
+        edge.style.width = Math.hypot(ddx, ddy) + 'px';
+        edge.style.transform = 'translate(' + tipX + 'px,' + tipY + 'px) rotate(' + (Math.atan2(ddy, ddx) * 180 / Math.PI) + 'deg)';
+        edge.style.opacity = String(glow);
+      }
+      glint.style.opacity = String(glow);
       glint.style.transform = 'translate3d(' + (r.right - 1) + 'px,' + (r.top + r.height * 0.28) + 'px,0) rotate(16deg)';
-      flash.style.opacity = String(Math.sin(pk * Math.PI) * 0.6);
+      flash.style.opacity = String(Math.sin(pk * Math.PI) * 0.65);
+      wash.style.opacity = String(Math.sin(pk * Math.PI) * 0.55);
     } else if (el < T_RISE + T_SLASH + T_FADE) {
-      // Page is already visible through the cut; only the bloom fades away
+      // Page is fully visible through the cut; light, edges and blade settle away
       const k = (el - T_RISE - T_SLASH) / T_FADE;
-      flash.style.opacity = String(0.6 * (1 - k));
+      flash.style.opacity = String(0.65 * (1 - k));
+      wash.style.opacity = String(0.55 * (1 - k));
+      glint.style.opacity = String(0.9 * (1 - k));
+      edgeA.style.opacity = String(0.9 * (1 - k));
+      edgeB.style.opacity = String(0.9 * (1 - k));
     } else {
       hide();
       return;
